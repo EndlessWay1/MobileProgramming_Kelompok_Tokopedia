@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../widgets/notification_categories.dart';
+
 class NotificationPage extends StatelessWidget {
   const NotificationPage({super.key});
 
@@ -19,12 +21,9 @@ class NotificationPage extends StatelessWidget {
         ),
 
         actions: const [
-          NotificationHeaderIcon(
-            icon: Icons.shopping_cart_outlined,
-            count: '2',
-          ),
+          NotificationHeaderIcon(icon: Icons.shopping_cart_outlined, count: 2),
 
-          NotificationHeaderIcon(icon: Icons.chat_bubble_outline, count: '3'),
+          NotificationHeaderIcon(icon: Icons.chat_bubble_outline, count: 3),
 
           SizedBox(width: 12),
         ],
@@ -65,6 +64,8 @@ class NotificationPage extends StatelessWidget {
           const SizedBox(height: 18),
 
           Container(height: 9, color: const Color(0xFFF2F3F2)),
+
+          const NotificationCategories(),
         ],
       ),
     );
@@ -73,7 +74,7 @@ class NotificationPage extends StatelessWidget {
 
 class NotificationHeaderIcon extends StatelessWidget {
   final IconData icon;
-  final String count;
+  final int count;
 
   const NotificationHeaderIcon({
     super.key,
@@ -85,35 +86,20 @@ class NotificationHeaderIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(left: 12),
-      child: Stack(
-        clipBehavior: Clip.none,
+      child: Badge(
+        isLabelVisible: count > 0,
 
-        children: [
-          Icon(icon, size: 25, color: const Color(0xFF108B4F)),
+        label: Text('$count'),
 
-          Positioned(
-            right: -8,
-            top: -8,
+        backgroundColor: const Color.fromARGB(255, 240, 106, 62),
 
-            child: Container(
-              padding: const EdgeInsets.all(3),
+        textColor: Colors.white,
 
-              decoration: const BoxDecoration(
-                color: Color(0xFFF36B3F),
-                shape: BoxShape.circle,
-              ),
-
-              child: Text(
-                count,
-                style: const TextStyle(
-                  fontSize: 9,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ],
+        child: Icon(
+          icon,
+          size: 25,
+          color: const Color.fromARGB(255, 16, 134, 77),
+        ),
       ),
     );
   }
