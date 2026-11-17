@@ -6,7 +6,6 @@ import config from './config.js';
 import logs from './logger.js';
 import methodOverride from 'method-override';
 
-
 const logger = logs('app');
 
 import routes from '../api/routes.js';
@@ -24,16 +23,15 @@ app.enable('trust proxy');
 // Enable cross origin resource sharing to all origins by default
 app.use(
   cors({
-    origin: process.env.ORIGIN,
+    // origin: process.env.ORIGIN,
     methods: ['POST', 'GET'],
-    credentials: true,
+    // credentials: true,
     allowedHeaders: ['Content-Type', 'X-CSRF-Token'],
   })
 );
 
 // Let you use HTTP verbs such as PUT or DELETE in places where the client doesn't support it
 app.use(methodOverride());
-
 
 // Middleware that transforms the raw string of request.body into JSON
 app.use(bodyParser.json());
