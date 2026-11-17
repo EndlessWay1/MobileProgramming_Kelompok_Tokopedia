@@ -1,4 +1,6 @@
+import 'package:aplikasi_tokped/features/live/screen/reels_page.dart';
 import 'package:flutter/material.dart';
+
 import '../../../home/presentation/pages/home_page.dart';
 import '../widgets/bottom_navbar.dart';
 
@@ -37,7 +39,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
       case 0:
         return const HomePage();
       case 1:
-        return const _TemporaryPage(title: 'Feed');
+        return const ReelsPage();
       case 2:
         return const _TemporaryPage(title: 'Notification');
       case 3:
