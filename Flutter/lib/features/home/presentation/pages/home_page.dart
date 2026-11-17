@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../domain/product.dart';
+import 'package:aplikasi_tokped/features/product/presentation/pages/product_detail_page.dart';
  
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -69,12 +70,21 @@ class _HomePageState extends State<HomePage> {
                 // struktur card produknya
                 return Card(
                   child: ListTile(
+                    mouseCursor: SystemMouseCursors.click,
                     title: Text(p.name),
                     subtitle: Text('Rp ${p.price}'),
                     trailing: IconButton(
                       icon: const Icon(Icons.add_shopping_cart),
                       onPressed: () => setState(() => _cartCount++),
                     ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const ProductDetailPage(),
+                        ),
+                      );
+                    },
                   ),
                 );
               },
