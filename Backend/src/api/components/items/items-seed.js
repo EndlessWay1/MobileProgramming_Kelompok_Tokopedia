@@ -4,8 +4,7 @@ const itemsData = [
   {
     title: 'Trail Running Shoe',
     description: 'Lightweight mesh upper with a grippy outsole for wet trails.',
-    price: 89,
-    discountPercentage: 15,
+    price: 'Rp 890.000',
     rating: 5,
     stock: 42,
     brand: 'Northpeak',
@@ -24,8 +23,7 @@ const itemsData = [
     title: 'Urban Running Sneakers',
     description:
       'Comfortable everyday sneakers with breathable fabric and cushioned soles.',
-    price: 75,
-    discountPercentage: 10,
+    price: 'Rp 750.000',
     rating: 4.5,
     stock: 28,
     brand: 'Northpeak',
@@ -44,8 +42,7 @@ const itemsData = [
     title: 'Classic Leather Backpack',
     description:
       'Premium leather backpack with multiple compartments for daily essentials.',
-    price: 120,
-    discountPercentage: 20,
+    price: 'Rp 1.200.000',
     rating: 4.8,
     stock: 15,
     brand: 'UrbanCraft',
@@ -64,8 +61,7 @@ const itemsData = [
     title: 'Wireless Bluetooth Headphones',
     description:
       'Noise-isolating wireless headphones with long battery life and deep bass.',
-    price: 149,
-    discountPercentage: 25,
+    price: 'Rp 250.000',
     rating: 4.7,
     stock: 35,
     brand: 'Soundwave',
@@ -84,8 +80,7 @@ const itemsData = [
     title: 'Minimalist Wrist Watch',
     description:
       'Elegant minimalist watch featuring a stainless steel case and leather strap.',
-    price: 199,
-    discountPercentage: 5,
+    price: 'Rp 300.000',
     rating: 4.9,
     stock: 12,
     brand: 'Chronos',
@@ -104,8 +99,7 @@ const itemsData = [
     title: 'Cotton Oversized T-Shirt',
     description:
       'Soft premium cotton oversized t-shirt suitable for casual everyday wear.',
-    price: 29,
-    discountPercentage: 0,
+    price: 'Rp 290.000',
     rating: 4.3,
     stock: 65,
     brand: 'BasicWear',
@@ -124,8 +118,7 @@ const itemsData = [
     title: 'Polarized Sports Sunglasses',
     description:
       'Lightweight polarized sunglasses offering UV protection for outdoor activities.',
-    price: 55,
-    discountPercentage: 12,
+    price: 'Rp 459.000',
     rating: 4.6,
     stock: 0,
     brand: 'VisionPro',
@@ -146,8 +139,7 @@ const itemsData = [
     title: 'Portable Power Bank',
     description:
       'Compact 20000mAh power bank with fast charging and dual USB output.',
-    price: 49,
-    discountPercentage: 15,
+    price: 'Rp 200.000',
     rating: 4.4,
     stock: 50,
     brand: 'VoltTech',
