@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../widgets/notification_categories.dart';
 
 class NotificationPage extends StatelessWidget {
@@ -21,9 +20,15 @@ class NotificationPage extends StatelessWidget {
         ),
 
         actions: const [
-          NotificationHeaderIcon(icon: Icons.shopping_cart_outlined, count: 2),
+          NotificationHeaderIcon(
+            icon: Icons.shopping_cart_outlined,
+            count: 2,
+          ),
 
-          NotificationHeaderIcon(icon: Icons.chat_bubble_outline, count: 3),
+          NotificationHeaderIcon(
+            icon: Icons.chat_bubble_outline, 
+            count: 3
+          ),
 
           SizedBox(width: 12),
         ],
@@ -63,7 +68,9 @@ class NotificationPage extends StatelessWidget {
 
           const SizedBox(height: 18),
 
-          Container(height: 9, color: const Color(0xFFF2F3F2)),
+          Container(height: 9, 
+          color: const Color.fromARGB(255, 242, 243, 242)
+          ),
 
           const NotificationCategories(),
         ],
