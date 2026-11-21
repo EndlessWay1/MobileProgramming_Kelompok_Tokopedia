@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../domain/product.dart';
+import 'package:aplikasi_tokped/models/shopping_item.dart';
+import 'package:aplikasi_tokped/utils.dart';
 import 'package:aplikasi_tokped/features/product/presentation/pages/product_detail_page.dart';
  
 class HomePage extends StatefulWidget {
@@ -13,8 +14,10 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   String _query = '';
   int _cartCount = 0;
+
+  // data produk dari items-seed.js
+  late Future<List<ShoppingItem>> _itemsFuture = fetchShoppingItem();
  
-  // buat bersihin resource kalau misal halamannya udh ga di homepage
   @override
   void dispose() {
     // kalo udh dihalaman yang bukan homepage, searchControllernya dibersihin
@@ -22,19 +25,47 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
  
-  // cari produk berdasarkan pencarian
-  List<Product> get _filteredProducts => allProducts
-      .where((p) => p.name.toLowerCase().contains(_query.toLowerCase()))
-      .toList();
+  // cari produk berdasarkan title produk
+  List<ShoppingItem> _filter(List<ShoppingItem> items) {
+    final q = _query.trim().toLowerCase();
+    if (q.isEmpty) return items;
+    return items.where((item) => item.title.toLowerCase().contains(q)).toList();
+  }
  
-  // produk mengambil daftar produk yang sudah difilter.
+  // harga setelah diskon
+  int _discounted(ShoppingItem item) =>
+      (item.price * (1 - item.discountPercentage / 100)).round();
+
+  MockProductItem _toDetail(ShoppingItem item) {
+    return MockProductItem(
+      title: item.title,
+      description: item.description,
+      price: item.price,
+      discountPercentage: item.discountPercentage,
+      rating: item.rating,
+      stock: item.stock,
+      brand: item.brand,
+      category: item.category,
+      sku: item.sku,
+      thumbnail: item.thumbnail,
+      images: item.images.isNotEmpty ? item.images : [item.thumbnail],
+    );
+  }
+
+  void _reload() {
+    setState(() {
+      _itemsFuture = fetchShoppingItem();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final products = _filteredProducts;
- 
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 16,
+        backgroundColor: const Color(0xFF165F42),
+        foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent, 
         title: _buildSearchBar(),
         actions: [
           Padding(
@@ -56,42 +87,115 @@ class _HomePageState extends State<HomePage> {
 
       // tampilin produk di halamannya
       // periksa apakah produk masih ada
-      body: products.isEmpty
-          ? const Center(child: Text('Produk tidak ditemukan'))
-          // kalau produknya ada, tampilin
-          : ListView.separated(
+      body: FutureBuilder<List<ShoppingItem>>(
+        future: _itemsFuture,
+        builder: (context, snapshot) {
+          // loading
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          // menampilkan error
+          if (snapshot.hasError) {
+            debugPrint('ERROR FETCH: ${snapshot.error}');
+            return Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text('Gagal memuat produk'),
+                  const SizedBox(height: 8),
+                  ElevatedButton(
+                    onPressed: _reload,
+                    child: const Text('Coba lagi'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          final products = _filter(snapshot.data ?? []);
+
+          if (products.isEmpty) {
+            return const Center(
+              child: Text('Produk yang dicari tidak ditemukan'),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              _reload();
+              await _itemsFuture;
+            },
+            child: ListView.separated(
               padding: const EdgeInsets.all(16),
-              // jika terdapat 6 produk, maka itemCount bernilai 6.
               itemCount: products.length,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
-              // Menentukan tampilan setiap produk
-              itemBuilder: (context, i) {
-                final p = products[i];
-                // struktur card produknya
-                return Card(
-                  child: ListTile(
-                    mouseCursor: SystemMouseCursors.click,
-                    title: Text(p.name),
-                    subtitle: Text('Rp ${p.price}'),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.add_shopping_cart),
-                      onPressed: () => setState(() => _cartCount++),
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const ProductDetailPage(),
-                        ),
-                      );
-                    },
-                  ),
-                );
-              },
+              itemBuilder: (context, i) => _buildProductCard(products[i]),
             ),
+          );
+        },
+      ),
     );
   }
  
+  Widget _buildProductCard(ShoppingItem p) {
+    final hasDiscount = p.discountPercentage > 0;
+
+    return Card(
+      color: Colors.white,
+      child: ListTile(
+        mouseCursor: SystemMouseCursors.click,
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.network(
+            p.thumbnail,
+            width: 56,
+            height: 56,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => Container(
+              width: 56,
+              height: 56,
+              color: Colors.grey.shade200,
+              child: const Icon(Icons.image_not_supported, color: Colors.grey),
+            ),
+          ),
+        ),
+        title: Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis),
+        subtitle: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Rp ${_discounted(p)}.000',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            if (hasDiscount)
+              Text(
+                'Rp ${p.price}.000  -${p.discountPercentage}.000%',
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+          ],
+        ),
+        trailing: IconButton(
+          icon: const Icon(Icons.add_shopping_cart),
+          // stok 0 -> tombol keranjang nonaktif
+          onPressed: p.stock > 0 ? () => setState(() => _cartCount++) : null,
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ProductDetailPage(product: _toDetail(p)),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildSearchBar() {
     return SizedBox(
       height: 40,
@@ -112,6 +216,7 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
           filled: true,
+          fillColor: Colors.white,
           contentPadding: EdgeInsets.zero,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
