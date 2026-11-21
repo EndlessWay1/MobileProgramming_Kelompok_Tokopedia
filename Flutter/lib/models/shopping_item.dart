@@ -3,6 +3,7 @@ class ShoppingItem {
   final String id;
   final String brand;
   final String category;
+  final String description;
   final int discountPercentage;
   final List<String> images;
   final int price;
@@ -17,6 +18,7 @@ class ShoppingItem {
     required this.id,
     required this.brand,
     required this.category,
+    required this.description,
     required this.discountPercentage,
     required this.images,
     required this.price,
@@ -33,6 +35,7 @@ class ShoppingItem {
       id: json['_id'] as String,
       brand: json['brand'] as String,
       category: json['category'] as String,
+      description: (json['description'] as String) ?? '',
       discountPercentage: (json['discountPercentage'] as num).toInt(),
       images: List<String>.from(json['images'] ?? []),
       price: (json['price'] as num).toInt(),

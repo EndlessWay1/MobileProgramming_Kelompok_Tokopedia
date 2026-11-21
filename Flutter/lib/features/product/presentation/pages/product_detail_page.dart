@@ -150,7 +150,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        'Rp $discountedPrice',
+                        'Rp $discountedPrice.000',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
@@ -159,7 +159,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        'Rp ${item.price}',
+                        'Rp ${item.price}.000',
                         style: const TextStyle(
                           fontSize: 14,
                           color: Colors.grey,

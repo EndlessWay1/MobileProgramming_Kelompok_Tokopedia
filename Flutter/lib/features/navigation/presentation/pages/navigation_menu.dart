@@ -1,4 +1,5 @@
 import 'package:aplikasi_tokped/features/live/screen/reels_page.dart';
+import 'package:aplikasi_tokped/features/profile/presentation/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 
 import '../../../home/presentation/pages/home_page.dart';
@@ -45,7 +46,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
       case 2:
         return const NotificationPage();
       case 3:
-        return const _TemporaryPage(title: 'Profile');
+        return const ProfilePage();
       default:
         return const SizedBox.shrink();
     }

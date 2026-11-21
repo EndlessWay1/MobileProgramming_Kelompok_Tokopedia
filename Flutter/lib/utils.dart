@@ -5,10 +5,11 @@ import 'package:flutter/foundation.dart';
 
 import 'package:aplikasi_tokped/models/shopping_item.dart';
 import 'package:http/http.dart' as http;
+import 'package:aplikasi_tokped/config.dart';
 
 Future<List<ShoppingItem>> fetchShoppingItem() async {
   final response = await http.Client().get(
-    Uri.parse('http://localhost:5000/api/items'),
+    Uri.parse('${AppConfig.baseUrl}/api/items'),
   );
 
   return compute(parseShoppingItem, response.body);

@@ -13,13 +13,13 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Online Shop',
+      title: 'Toko E-Commerce',
       theme: ThemeData(
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 15, 21, 108),
+          seedColor: const Color(0xFF30CF8F),
         ),
-        scaffoldBackgroundColor: const Color.fromARGB(255, 238, 239, 238),
+        scaffoldBackgroundColor: const Color(0xFFEAFAF4),
       ),
       home: const NavigationMenu(),
     );
