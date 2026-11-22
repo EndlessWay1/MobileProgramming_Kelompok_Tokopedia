@@ -1,161 +1,107 @@
 import 'package:flutter/material.dart';
+import '../../data/notification_data.dart';
+import '../../../../core/theme/appColors.dart';
 
 class NotificationCategories extends StatelessWidget {
-  const NotificationCategories({super.key});
+  final NotificationCategory? selectedCategory;
+  final ValueChanged<NotificationCategory?> onCategorySelected;
+  const NotificationCategories({
+    super.key,
+    required this.selectedCategory,
+    required this.onCategorySelected,
+    });
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-
-      padding: const EdgeInsets.only(top: 16, bottom: 12),
-
-      child: Column(
-        children: [
-          //judul section
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
-              children: const [
-                Text(
-                  'Update terbaru',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
-
-                Text(
-                  'Tandai sudah dibaca',
-                  style: TextStyle(color: Colors.black54, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 18),
-
-          //daftar kategori
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-
-            child: Row(
-              children: [
-                _CategoryItem(
-                  icon: Icons.thumb_up_alt_rounded,
-                  label: 'Pilihan Teratas',
-                  selected: true,
-                  badge: '1',
-                ),
-
-                _CategoryItem(icon: Icons.local_offer_outlined, label: 'Promo'),
-
-                _CategoryItem(
-                  icon: Icons.live_tv_outlined,
-                  label: 'Live & Video',
-                ),
-
-                _CategoryItem(
-                  icon: Icons.account_balance_wallet_outlined,
-                  label: 'Keuangan',
-                ),
-
-                _CategoryItem(
-                  icon: Icons.storefront_outlined,
-                  label: 'Info Toko',
-                ),
-              ],
-            ),
-          ),
-        ],
+    static const List<_NotificationFilter> _filters = [
+      _NotificationFilter(
+        label: 'Semua',
+        icon: Icons.grid_view_rounded,
+        category: null,
       ),
-    );
-  }
-}
+      _NotificationFilter(
+        label: 'Pesanan',
+        icon: Icons.local_shipping_outlined,
+        category: NotificationCategory.order,
+      ),
+      _NotificationFilter(
+        label: 'Promo',
+        icon: Icons.local_offer_outlined,
+        category: NotificationCategory.promo,
+      ),
+      _NotificationFilter(
+        label: 'Live',
+        icon: Icons.play_circle_outline_rounded,
+        category: NotificationCategory.live,
+      ),
+      _NotificationFilter(
+        label: 'Keuangan',
+        icon: Icons.account_balance_wallet_outlined,
+        category: NotificationCategory.finance,
+      ),
+      _NotificationFilter(
+        label: 'Toko',
+        icon: Icons.storefront_outlined,
+        category: NotificationCategory.store,
+      ),
+    ];   
+    
+    @override
+    Widget build(BuildContext context) {
+      return SizedBox(
+        height: 43,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          itemCount: _filters.length,
+          separatorBuilder: (context, index) {
+            return const SizedBox(width: 8);
+          },
+          itemBuilder: (context, index){
+            final filter = _filters[index];
 
-//masing2 kategori
-class _CategoryItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final bool selected;
-  final String? badge;
+            final isSelected = selectedCategory == filter.category;
 
-  const _CategoryItem({
-    required this.icon,
-    required this.label,
-    this.selected = false,
-    this.badge,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected
-        ? const Color.fromARGB(255, 14, 126, 72)
-        : Colors.grey.shade600;
-
-    return Container(
-      width: 88,
-      padding: const EdgeInsets.only(bottom: 8),
-
-      decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(
-            color: selected
-                ? const Color.fromARGB(255, 14, 126, 72)
-                : Colors.transparent,
-
-            width: 2,
-          ),
+            return ChoiceChip(
+              selected: isSelected,
+              showCheckmark: false,
+              onSelected: (selected) {
+                onCategorySelected(filter.category);
+              },
+              avatar: Icon(filter.icon,
+              size: 17,
+              color: isSelected ? Colors.white : AppColors.deepGreen,
+              ),
+              label: Text(filter.label),
+              labelStyle: TextStyle(
+                color: isSelected ? Colors.white : AppColors.darkPine,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+              backgroundColor: Colors.white,
+              selectedColor: AppColors.deepGreen,
+              side: BorderSide(
+                color: isSelected ? AppColors.deepGreen : AppColors.softMint,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 9,
+                vertical: 7,
+              ),
+            );
+          },
         ),
-      ),
-
-      child: Column(
-        children: [
-          Stack(
-            clipBehavior: Clip.none,
-
-            children: [
-              Icon(icon, size: 27, color: color),
-
-              if (badge != null)
-                Positioned(
-                  right: -10,
-                  top: -8,
-
-                  child: Container(
-                    padding: const EdgeInsets.all(3),
-
-                    decoration: const BoxDecoration(
-                      color: Color.fromRGBO(243, 107, 63, 1),
-                      shape: BoxShape.circle,
-                    ),
-
-                    child: Text(
-                      badge!,
-                      style: const TextStyle(fontSize: 9, color: Colors.white),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-
-          const SizedBox(height: 8),
-
-          Text(
-            label,
-            textAlign: TextAlign.center,
-
-            maxLines: 2,
-
-            style: TextStyle(
-              fontSize: 11,
-              color: color,
-
-              fontWeight: selected ? FontWeight.bold : FontWeight.normal,
-            ),
-          ),
-        ],
-      ),
-    );
+      );
+    }
   }
+  
+class _NotificationFilter {
+  final String label;
+  final IconData icon;
+  final NotificationCategory? category;
+
+  const _NotificationFilter({
+    required this.label,
+    required this.icon,
+    required this.category,
+  });
 }
