@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:aplikasi_tokped/config.dart';
 
 class ReelVideo extends StatefulWidget {
   final String videoUrl;
@@ -35,7 +36,7 @@ class _ReelVideoState extends State<ReelVideo> {
 
     controller = VideoPlayerController.networkUrl(
       Uri.parse(
-        'http://localhost:5000/api/videos/${extractGoogleDriveId(widget.videoUrl)!}',
+        '${AppConfig.baseUrl}/api/videos/${extractGoogleDriveId(widget.videoUrl)!}',
       ),
     );
 
