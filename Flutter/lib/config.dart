@@ -10,10 +10,10 @@ class AppConfig {
 
     // Android emulator: localhost = emulator itu sendiri, komputer = 10.0.2.2
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.android) {
-      return 'http://10.0.2.2:5000';
+      return 'https://tokopediabackend-xi.vercel.app';
     }
 
     // Web, iOS simulator, Windows/macOS/Linux desktop
-    return 'http://localhost:5000';
+    return 'https://tokopediabackend-xi.vercel.app';
   }
 }

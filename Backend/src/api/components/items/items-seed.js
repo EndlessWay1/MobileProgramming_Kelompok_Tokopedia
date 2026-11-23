@@ -56,7 +56,7 @@ const itemsData = [
     ],
     video:
       'https://drive.google.com/uc?id=1V6SOn8lzWSSRvTdgDVq74PoYdoHQTx8D&export=download',
-  }, 
+  },
   {
     title: 'Wireless Bluetooth Headphones',
     description:
@@ -171,7 +171,7 @@ const itemsData = [
       'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164187/mykonos2.webp',
     ],
     video:
-      'https://drive.google.com/file/d/1r1zIwwmi27638g64AR4sKmfEKOHi-jiz/view?usp=drive_link',
+      'https://drive.google.com/uc?id=1r1zIwwmi27638g64AR4sKmfEKOHi-jiz&export=download',
   },
   {
     title: 'Kipas Turbo GFS001',
@@ -190,8 +190,8 @@ const itemsData = [
       'https://res.cloudinary.com/gsf35r1h/image/upload/f_auto,q_auto/goojodoq2',
     ],
     video:
-      'https://drive.google.com/file/d/19-abpEoZBm-DzdbjYJ2CxtRd1a0VxMks/view?usp=drive_link',
-  },  
+      'https://drive.google.com/uc?id=19-abpEoZBm-DzdbjYJ2CxtRd1a0VxMks&export=download',
+  },
   {
     title: 'Spray Plaster',
     description:
@@ -209,7 +209,7 @@ const itemsData = [
       'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164224/hansaplast1.avif',
     ],
     video:
-      'https://drive.google.com/file/d/1yUmOZkngwp03FvDU1C5UNq6s5V6jrJ3l/view?usp=drive_link',
+      'https://drive.google.com/uc?id=1yUmOZkngwp03FvDU1C5UNq6s5V6jrJ3l&export=download',
   },
   {
     title: 'Pikachu and Poke Ball',
@@ -228,7 +228,7 @@ const itemsData = [
       'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164224/hansaplast1.avif',
     ],
     video:
-      'https://drive.google.com/file/d/1fWlZMcvBC0owcFP1Pmi7un_56hRIlmmn/view?usp=drive_link',
+      'https://drive.google.com/uc?id=1fWlZMcvBC0owcFP1Pmi7un_56hRIlmmn&export=download',
   },
   {
     title: 'Mood Glowy Tint',
@@ -247,7 +247,7 @@ const itemsData = [
       'https://res.cloudinary.com/gsf35r1h/image/upload/v1795358182/s-l1200.png',
     ],
     video:
-      'https://drive.google.com/file/d/1lYmxaBhZqE87fTuX7voeOyPXFo_cQ8tD/view?usp=drive_link',
+      'https://drive.google.com/uc?id=1lYmxaBhZqE87fTuX7voeOyPXFo_cQ8tD&export=download',
   },
 ];
 
