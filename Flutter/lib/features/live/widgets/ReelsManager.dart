@@ -14,6 +14,8 @@ class ReelManager extends StatefulWidget {
 class _ReelManagerState extends State<ReelManager> {
   late List<ShoppingItem> itemsAvail;
   late final PageController controller;
+  int currentPage = 0;
+
   @override
   void initState() {
     super.initState();
@@ -39,14 +41,12 @@ class _ReelManagerState extends State<ReelManager> {
     return PageView.builder(
       scrollDirection: Axis.vertical,
       itemCount: itemsAvail.length,
+      onPageChanged: (i) => setState(() => currentPage = i),
       itemBuilder: (context, index) {
-        return Column(
-          children: [
-            ReelVideo(
-              videoUrl: itemsAvail[index].video,
-              key: ValueKey(itemsAvail[index].id),
-            ),
-          ],
+        return ReelVideo(
+          videoUrl: itemsAvail[index].video,
+          key: ValueKey(itemsAvail[index].id),
+          isActive: index == currentPage,
         );
       },
     );
