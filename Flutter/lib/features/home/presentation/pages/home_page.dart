@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:aplikasi_tokped/models/shopping_item.dart';
 import 'package:aplikasi_tokped/utils.dart';
 import 'package:aplikasi_tokped/features/product/presentation/pages/product_detail_page.dart';
- 
+import 'package:aplikasi_tokped/features/cart/data/cart_controller.dart';
+import 'package:aplikasi_tokped/features/cart/presentation/pages/cart_page.dart';
+
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
  
@@ -13,7 +15,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   String _query = '';
-  int _cartCount = 0;
 
   // data produk dari items-seed.js
   late Future<List<ShoppingItem>> _itemsFuture = fetchShoppingItem();
@@ -52,6 +53,22 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // Menambahkan barang ke keranjang
+  void _addToCart(ShoppingItem item) {
+    final success = CartController.instance.add(item);
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          success
+              ? 'Produk berhasil ditambahkan ke keranjang'
+              : 'Jumlah di keranjang sudah mencapai stok',
+        ),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
   void _reload() {
     setState(() {
       _itemsFuture = fetchShoppingItem();
@@ -70,15 +87,25 @@ class _HomePageState extends State<HomePage> {
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
-            child: IconButton(
-              tooltip: 'Keranjang',
-              icon: Badge(
-                isLabelVisible: _cartCount > 0,
-                label: Text('$_cartCount'),
-                child: const Icon(Icons.shopping_cart_outlined),
-              ),
-              onPressed: () {
-                // TODO: navigasi ke halaman keranjang
+            // Badge keupdate tiap isi keranjang berubah
+            child: ListenableBuilder(
+              listenable: CartController.instance,
+              builder: (context, _) {
+                final count = CartController.instance.totalQuantity;
+                return IconButton(
+                  tooltip: 'Keranjang',
+                  icon: Badge(
+                    isLabelVisible: count > 0,
+                    label: Text('$count'),
+                    child: const Icon(Icons.shopping_cart_outlined),
+                  ),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const CartPage()),
+                    );
+                  },
+                );
               },
             ),
           ),
@@ -182,13 +209,13 @@ class _HomePageState extends State<HomePage> {
         trailing: IconButton(
           icon: const Icon(Icons.add_shopping_cart),
           // stok 0 -> tombol keranjang nonaktif
-          onPressed: p.stock > 0 ? () => setState(() => _cartCount++) : null,
+          onPressed: p.stock > 0 ? () => _addToCart(p) : null,
         ),
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProductDetailPage(product: _toDetail(p)),
+              builder: (context) => ProductDetailPage(product: _toDetail(p), shoppingItem: p,),
             ),
           );
         },
