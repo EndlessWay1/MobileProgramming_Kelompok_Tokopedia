@@ -197,7 +197,7 @@ class _HomePageState extends State<HomePage> {
             ),
             if (hasDiscount)
               Text(
-                'Rp ${p.price}.000  -${p.discountPercentage}.000%',
+                'Rp ${p.price}.000  -${p.discountPercentage}%',
                 style: const TextStyle(
                   fontSize: 12,
                   color: Colors.grey,
