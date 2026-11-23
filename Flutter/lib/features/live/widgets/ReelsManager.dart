@@ -2,6 +2,8 @@ import 'package:aplikasi_tokped/features/live/widgets/ReelVideo.dart';
 import 'package:aplikasi_tokped/models/shopping_item.dart';
 import 'package:flutter/material.dart';
 
+import 'dart:math';
+
 class ReelManager extends StatefulWidget {
   final List<ShoppingItem> shopping_item;
 
@@ -44,9 +46,16 @@ class _ReelManagerState extends State<ReelManager> {
       onPageChanged: (i) => setState(() => currentPage = i),
       itemBuilder: (context, index) {
         return ReelVideo(
-          videoUrl: itemsAvail[index].video,
           key: ValueKey(itemsAvail[index].id),
           isActive: index == currentPage,
+          initialStats:
+              // The number is randomized, to visualized the fetching data from backend, and make the data more real
+              ReelStats(
+                likes: Random().nextInt(10) + 10,
+                shares: Random().nextInt(5) + 10,
+                comments: Random().nextInt(4) + 1,
+              ),
+          item: itemsAvail[index],
         );
       },
     );
