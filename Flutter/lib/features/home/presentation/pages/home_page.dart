@@ -7,32 +7,32 @@ import 'package:aplikasi_tokped/features/cart/presentation/pages/cart_page.dart'
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
- 
+
   @override
   State<HomePage> createState() => _HomePageState();
 }
- 
+
 class _HomePageState extends State<HomePage> {
   final TextEditingController _searchController = TextEditingController();
   String _query = '';
 
   // data produk dari items-seed.js
   late Future<List<ShoppingItem>> _itemsFuture = fetchShoppingItem();
- 
+
   @override
   void dispose() {
     // kalo udh dihalaman yang bukan homepage, searchControllernya dibersihin
     _searchController.dispose();
     super.dispose();
   }
- 
+
   // cari produk berdasarkan title produk
   List<ShoppingItem> _filter(List<ShoppingItem> items) {
     final q = _query.trim().toLowerCase();
     if (q.isEmpty) return items;
     return items.where((item) => item.title.toLowerCase().contains(q)).toList();
   }
- 
+
   // harga setelah diskon
   int _discounted(ShoppingItem item) =>
       (item.price * (1 - item.discountPercentage / 100)).round();
@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
         titleSpacing: 16,
         backgroundColor: const Color(0xFF165F42),
         foregroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent, 
+        surfaceTintColor: Colors.transparent,
         title: _buildSearchBar(),
         actions: [
           Padding(
@@ -153,10 +153,16 @@ class _HomePageState extends State<HomePage> {
               _reload();
               await _itemsFuture;
             },
-            child: ListView.separated(
-              padding: const EdgeInsets.all(16),
+            // Menampilkan produk dengan view grid
+            child: GridView.builder(
+              padding: const EdgeInsets.all(5),
               itemCount: products.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 10,
+                childAspectRatio: 0.60,
+              ),
               itemBuilder: (context, i) => _buildProductCard(products[i]),
             ),
           );
@@ -164,61 +170,80 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
- 
+
   Widget _buildProductCard(ShoppingItem p) {
     final hasDiscount = p.discountPercentage > 0;
 
     return Card(
       color: Colors.white,
-      child: ListTile(
-        mouseCursor: SystemMouseCursors.click,
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            p.thumbnail,
-            width: 56,
-            height: 56,
-            fit: BoxFit.cover,
-            errorBuilder: (_, _, _) => Container(
-              width: 56,
-              height: 56,
-              color: Colors.grey.shade200,
-              child: const Icon(Icons.image_not_supported, color: Colors.grey),
-            ),
-          ),
-        ),
-        title: Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Rp ${_discounted(p)}.000',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            if (hasDiscount)
-              Text(
-                'Rp ${p.price}.000  -${p.discountPercentage}%',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey,
-                  decoration: TextDecoration.lineThrough,
-                ),
-              ),
-          ],
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.add_shopping_cart),
-          // stok 0 -> tombol keranjang nonaktif
-          onPressed: p.stock > 0 ? () => _addToCart(p) : null,
-        ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: () {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ProductDetailPage(product: _toDetail(p), shoppingItem: p,),
+              builder: (context) =>
+                  ProductDetailPage(product: _toDetail(p), shoppingItem: p),
             ),
           );
         },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // gambar
+            AspectRatio(
+              aspectRatio: 1,
+              child: Image.network(
+                p.thumbnail,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Container(
+                  color: Colors.grey.shade200,
+                  child: const Icon(
+                    Icons.image_not_supported,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(8, 8, 4, 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // nama produk
+                    Text(p.title, maxLines: 2, overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 17),
+                    ),
+                    const SizedBox(height: 2),
+                    // brand
+                    Text(
+                      p.brand,
+                      style: const TextStyle(fontSize: 15, color: Colors.grey),
+                    ),
+                    const Spacer(),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Rp ${p.price}.000',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        IconButton(
+                          visualDensity: VisualDensity.compact,
+                          icon: const Icon(Icons.add_shopping_cart),
+                          onPressed: p.stock > 0 ? () => _addToCart(p) : null,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
