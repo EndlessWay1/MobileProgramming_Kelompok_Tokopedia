@@ -8,10 +8,10 @@ class CheckoutPage extends StatefulWidget {
 
   const CheckoutPage({
     super.key,
-    this.title = 'Trail Running Shoe',
-    this.price = 145000,
-    this.brand = 'Northpeak',
-    this.thumbnail = 'https://trail-running-shoe.hostmora.app/trail-running-shoe1.jpg',
+    required this.title,
+    required this.price,
+    required this.brand,
+    required this.thumbnail,
   });
 
   @override
