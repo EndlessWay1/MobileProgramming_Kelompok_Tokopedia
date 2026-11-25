@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:aplikasi_tokped/features/product/presentation/pages/product_detail_page.dart';
 import 'package:flutter/foundation.dart';
 
 import 'package:aplikasi_tokped/models/shopping_item.dart';
@@ -21,3 +22,17 @@ List<ShoppingItem> parseShoppingItem(String responseBody) {
       .map<ShoppingItem>((json) => ShoppingItem.fromJson(json))
       .toList();
 }
+
+MockProductItem toMock(ShoppingItem s) => MockProductItem(
+  title: s.title, // adjust the field names
+  description: s.description, // to match your ShoppingItem
+  price: s.price,
+  discountPercentage: s.discountPercentage,
+  rating: s.rating,
+  stock: s.stock,
+  brand: s.brand,
+  category: s.category,
+  sku: s.sku,
+  thumbnail: s.thumbnail,
+  images: s.images,
+);

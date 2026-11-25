@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:aplikasi_tokped/features/checkout/presentation/pages/checkout_page.dart';
+import 'package:aplikasi_tokped/features/cart/data/cart_controller.dart';
+import 'package:aplikasi_tokped/features/cart/presentation/pages/cart_page.dart';
+import 'package:aplikasi_tokped/models/shopping_item.dart';
 
 class MockProductItem {
   final String title;
@@ -32,7 +35,10 @@ class MockProductItem {
 class ProductDetailPage extends StatefulWidget {
   final MockProductItem? product;
 
-  const ProductDetailPage({super.key, this.product});
+  // Data asli produk
+  final ShoppingItem? shoppingItem;
+
+  const ProductDetailPage({super.key, this.product, this.shoppingItem});
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -79,9 +85,24 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
             icon: const Icon(Icons.share_outlined),
             onPressed: () {},
           ),
-          IconButton(
-            icon: const Icon(Icons.shopping_cart_outlined),
-            onPressed: () {},
+          ListenableBuilder(
+            listenable: CartController.instance,
+            builder: (context, _) {
+              final count = CartController.instance.totalQuantity;
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: count > 0,
+                  label: Text('$count'),
+                  child: const Icon(Icons.shopping_cart_outlined),
+                ),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CartPage()),
+                  );
+                },
+              );
+            },
           ),
         ],
       ),
@@ -202,12 +223,11 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         '${item.rating}',
                         style: const TextStyle(fontWeight: FontWeight.bold),
                       ),
-                      const SizedBox(width: 8),
+                      const Spacer(),
                       Text(
-                        '•  Terjual ${item.stock}',
+                        'Terjual ${item.stock}',
                         style: const TextStyle(color: Colors.grey),
                       ),
-                      const Spacer(),
                       IconButton(
                         icon: Icon(
                           _isFavorite ? Icons.favorite : Icons.favorite_border,
@@ -301,10 +321,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                 ),
                 onPressed: () {
+                  // kalau halaman dibuka tanpa data asli (produk contoh), tidak ada yang dimasukkan
+                  final shoppingItem = widget.shoppingItem;
+                  final success = shoppingItem != null && CartController.instance.add(shoppingItem);
+                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Produk berhasil ditambahkan ke keranjang'),
-                      duration: Duration(seconds: 1),
+                    SnackBar(
+                      content: Text(
+                        success
+                            ? 'Produk berhasil ditambahkan ke keranjang'
+                            : 'Produk tidak bisa ditambahkan (stok habis / sudah maksimal)',
+                      ),
+                      duration: const Duration(seconds: 1),
                     ),
                   );
                 },

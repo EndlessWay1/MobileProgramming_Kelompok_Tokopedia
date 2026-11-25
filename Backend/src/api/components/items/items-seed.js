@@ -4,8 +4,7 @@ const itemsData = [
   {
     title: 'Trail Running Shoe',
     description: 'Lightweight mesh upper with a grippy outsole for wet trails.',
-    price: 89,
-    discountPercentage: 15,
+    price: 890,
     rating: 5,
     stock: 42,
     brand: 'Northpeak',
@@ -24,8 +23,7 @@ const itemsData = [
     title: 'Urban Running Sneakers',
     description:
       'Comfortable everyday sneakers with breathable fabric and cushioned soles.',
-    price: 75,
-    discountPercentage: 10,
+    price: 750,
     rating: 4.5,
     stock: 28,
     brand: 'Northpeak',
@@ -44,8 +42,7 @@ const itemsData = [
     title: 'Classic Leather Backpack',
     description:
       'Premium leather backpack with multiple compartments for daily essentials.',
-    price: 120,
-    discountPercentage: 20,
+    price: 1200,
     rating: 4.8,
     stock: 15,
     brand: 'UrbanCraft',
@@ -59,13 +56,12 @@ const itemsData = [
     ],
     video:
       'https://drive.google.com/uc?id=1V6SOn8lzWSSRvTdgDVq74PoYdoHQTx8D&export=download',
-  }, // IM HERE
+  },
   {
     title: 'Wireless Bluetooth Headphones',
     description:
       'Noise-isolating wireless headphones with long battery life and deep bass.',
-    price: 149,
-    discountPercentage: 25,
+    price: 250,
     rating: 4.7,
     stock: 35,
     brand: 'Soundwave',
@@ -84,8 +80,7 @@ const itemsData = [
     title: 'Minimalist Wrist Watch',
     description:
       'Elegant minimalist watch featuring a stainless steel case and leather strap.',
-    price: 199,
-    discountPercentage: 5,
+    price: 300,
     rating: 4.9,
     stock: 12,
     brand: 'Chronos',
@@ -104,8 +99,7 @@ const itemsData = [
     title: 'Cotton Oversized T-Shirt',
     description:
       'Soft premium cotton oversized t-shirt suitable for casual everyday wear.',
-    price: 29,
-    discountPercentage: 0,
+    price: 290,
     rating: 4.3,
     stock: 65,
     brand: 'BasicWear',
@@ -124,8 +118,7 @@ const itemsData = [
     title: 'Polarized Sports Sunglasses',
     description:
       'Lightweight polarized sunglasses offering UV protection for outdoor activities.',
-    price: 55,
-    discountPercentage: 12,
+    price: 459,
     rating: 4.6,
     stock: 0,
     brand: 'VisionPro',
@@ -146,8 +139,7 @@ const itemsData = [
     title: 'Portable Power Bank',
     description:
       'Compact 20000mAh power bank with fast charging and dual USB output.',
-    price: 49,
-    discountPercentage: 15,
+    price: 200,
     rating: 4.4,
     stock: 50,
     brand: 'VoltTech',
@@ -161,6 +153,101 @@ const itemsData = [
     ],
     video:
       'https://drive.google.com/uc?id=1kKG9rql8PV5dtaRxYTdUUmd50IF8NEUK&export=download',
+  },
+  {
+    title: 'Dark Secret EDP 15ML',
+    description:
+      'Mykonos Dark Secret adalah parfum unisex berkarakter manis hangat dengan perpaduan aroma black cherry, rempah kayu manis, praline, serta amber dan kayu-kayuan yang memberi kesan misterius sekaligus elegan.',
+    price: 100,
+    rating: 4.9,
+    stock: 50,
+    brand: 'MYKONOS',
+    category: 'cosmetics',
+    sku: 'DS-50',
+    thumbnail:
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164175/mykonos1.webp',
+    images: [
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164175/mykonos1.webp',
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164187/mykonos2.webp',
+    ],
+    video:
+      'https://drive.google.com/uc?id=1r1zIwwmi27638g64AR4sKmfEKOHi-jiz&export=download',
+  },
+  {
+    title: 'Kipas Turbo GFS001',
+    description:
+      'Kipas angin turbo portabel berkecepatan tinggi dengan 100 tingkat pengaturan angin, layar LED digital, dan motor senyap yang praktis untuk dibawa bepergian maupun diletakkan di meja.',
+    price: 149,
+    rating: 4.8,
+    stock: 75,
+    brand: 'Goojodoq',
+    category: 'electronics',
+    sku: 'KTG-75',
+    thumbnail:
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164154/goojodoq1.webp',
+    images: [
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164154/goojodoq1.webp',
+      'https://res.cloudinary.com/gsf35r1h/image/upload/f_auto,q_auto/goojodoq2',
+    ],
+    video:
+      'https://drive.google.com/uc?id=19-abpEoZBm-DzdbjYJ2CxtRd1a0VxMks&export=download',
+  },
+  {
+    title: 'Spray Plaster',
+    description:
+      'Hansaplast Spray Plaster adalah plester semprot cepat kering yang membentuk lapisan tipis transparan, fleksibel, dan tahan air untuk melindungi luka ringan seperti goresan dan lecet.',
+    price: 152,
+    rating: 4.9,
+    stock: 63,
+    brand: 'Hansaplast',
+    category: 'health',
+    sku: 'SP-63',
+    thumbnail:
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164270/images.jpg',
+    images: [
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164270/images.jpg',
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164224/hansaplast1.avif',
+    ],
+    video:
+      'https://drive.google.com/uc?id=1yUmOZkngwp03FvDU1C5UNq6s5V6jrJ3l&export=download',
+  },
+  {
+    title: 'Pikachu and Poke Ball',
+    description:
+      'LEGO Pokémon Pikachu and Poké Ball adalah set rakitan pajangan berisi 2.050 keping yang menghadirkan figur Pikachu berpose dinamis bersama replika Poké Ball ikonik.',
+    price: 3831,
+    rating: 4.5,
+    stock: 40,
+    brand: 'Lego',
+    category: 'toys',
+    sku: 'PPB-40',
+    thumbnail:
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164270/images.jpg',
+    images: [
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164270/images.jpg',
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795164224/hansaplast1.avif',
+    ],
+    video:
+      'https://drive.google.com/uc?id=1fWlZMcvBC0owcFP1Pmi7un_56hRIlmmn&export=download',
+  },
+  {
+    title: 'Mood Glowy Tint',
+    description:
+      'Peripera Ink Mood Glowy Tint adalah lip tint bertekstur ringan yang melembapkan dan memberikan kilau glossy alami tanpa rasa lengket.',
+    price: 221,
+    rating: 4.7,
+    stock: 55,
+    brand: 'Peripera',
+    category: 'cosmetics',
+    sku: 'MGT-55',
+    thumbnail:
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795358152/id-11134207-8224y-mkdcdcz27h1j1e.jpg',
+    images: [
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795358152/id-11134207-8224y-mkdcdcz27h1j1e.jpg',
+      'https://res.cloudinary.com/gsf35r1h/image/upload/v1795358182/s-l1200.png',
+    ],
+    video:
+      'https://drive.google.com/uc?id=1lYmxaBhZqE87fTuX7voeOyPXFo_cQ8tD&export=download',
   },
 ];
 
