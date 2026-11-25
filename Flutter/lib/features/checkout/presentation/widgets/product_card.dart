@@ -24,10 +24,24 @@ class CheckoutItem {
 
 // format ribuan pake titik
 String formatRp(int angka) {
-  return angka.toString().replaceAllMapped(
-    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-    (m) => '${m[1]}.',
-  );
+  bool minus = angka < 0;
+  String teks = angka.abs().toString();
+  String hasil = '';
+  int hitung = 0;
+
+  for (int i = teks.length - 1; i >= 0; i--) {
+    hasil = teks[i] + hasil;
+    hitung++;
+    if (hitung == 3 && i != 0) {
+      hasil = '.$hasil';
+      hitung = 0;
+    }
+  }
+
+  if (minus) {
+    return '-$hasil';
+  }
+  return hasil;
 }
 
 class ProductCard extends StatelessWidget {

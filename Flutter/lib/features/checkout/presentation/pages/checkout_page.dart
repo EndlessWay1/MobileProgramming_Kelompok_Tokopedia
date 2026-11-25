@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aplikasi_tokped/core/app_colors.dart';
+import 'package:aplikasi_tokped/features/checkout/data/order_storage.dart';
 import 'package:aplikasi_tokped/features/checkout/presentation/widgets/product_card.dart';
 import 'package:aplikasi_tokped/features/profile/data/secure_storage.dart';
 import 'package:aplikasi_tokped/features/profile/presentation/pages/register_page.dart';
@@ -62,6 +63,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
     print('data profile: $data');
     var name = (data['username'] ?? '').trim();
 
+    if (!mounted) return;
+
     // kalau belum login suruh daftar dulu
     if (name == '') {
       Navigator.pushReplacement(
@@ -84,6 +87,67 @@ class _CheckoutPageState extends State<CheckoutPage> {
       hasil += item.price * item.quantity;
     }
     return hasil;
+  }
+
+  Duration getDurasiKurir(String namaKurir) {
+    if (namaKurir == 'Instant') {
+      return Duration(seconds: 30);
+    } else if (namaKurir == 'Fast') {
+      return Duration(minutes: 1);
+    } else {
+      return Duration(minutes: 2);
+    }
+  }
+
+  void bayarSekarang(int totalBayar, int totalQty) async {
+    print('bayar sekarang: $totalBayar');
+
+    var sekarang = DateTime.now();
+    var durasi = getDurasiKurir(kurir);
+
+    List<OrderItem> listBarang = [];
+    for (var barang in items) {
+      listBarang.add(
+        OrderItem(
+          title: barang.title,
+          price: barang.price,
+          brand: barang.brand,
+          thumbnail: barang.thumbnail,
+          quantity: barang.quantity,
+        ),
+      );
+    }
+
+    var order = OrderData(
+      id: sekarang.millisecondsSinceEpoch.toString(),
+      items: listBarang,
+      kurir: kurir,
+      ongkir: ongkir,
+      totalBayar: totalBayar,
+      alamat: alamat,
+      createdAt: sekarang,
+      arriveAt: sekarang.add(durasi),
+    );
+
+    await OrderStorage.saveOrder(order);
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Pembayaran Berhasil'),
+        content: Text('Pesanan untuk $totalQty barang berhasil dibuat!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+            },
+            child: Text('Selesai'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -148,8 +212,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                   SizedBox(height: 12),
 
-                  ...items.map((barang) {
-                    return ProductCard(
+                  for (var barang in items)
+                    ProductCard(
                       item: barang,
                       onAdd: () {
                         setState(() {
@@ -163,8 +227,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           });
                         }
                       },
-                    );
-                  }),
+                    ),
 
                   // TODO: nanti tambah pilihan metode pembayaran (transfer / e-wallet)
                   Container(
@@ -267,24 +330,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     foregroundColor: Colors.white,
                   ),
                   onPressed: () {
-                    print('bayar sekarang: $totalBayar');
-                    // sementara pake dialog aja dulu
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Pembayaran Berhasil'),
-                        content: Text('Pesanan untuk $totalQty barang berhasil dibuat!'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                            },
-                            child: Text('Selesai'),
-                          ),
-                        ],
-                      ),
-                    );
+                    bayarSekarang(totalBayar, totalQty);
                   },
                   child: Text('Bayar Sekarang'),
                 ),
