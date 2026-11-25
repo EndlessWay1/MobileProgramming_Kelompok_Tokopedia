@@ -10,7 +10,7 @@ import '../widgets/custom_text_field.dart';
 import 'register_page.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({Key? key}) : super(key: key);
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -132,7 +132,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 }
 
                 var sukses = await ProfileStorage.deleteProfile(inputEmail, inputPass);
-                print('hasil logout: $sukses');
                 if (!mounted) return;
 
                 if (sukses) {
@@ -213,7 +212,6 @@ class _ProfilePageState extends State<ProfilePage> {
       }
     }
 
-    // TODO: tambahin fitur edit profil nanti
     return Scaffold(
       backgroundColor: AppColors.paleMintWhite,
       appBar: AppBar(
@@ -407,7 +405,7 @@ class SheetPesanan extends StatefulWidget {
   final List<OrderData> orders;
   final bool sudahTiba;
 
-  SheetPesanan({required this.orders, required this.sudahTiba});
+  const SheetPesanan({super.key, required this.orders, required this.sudahTiba});
 
   @override
   State<SheetPesanan> createState() => _SheetPesananState();

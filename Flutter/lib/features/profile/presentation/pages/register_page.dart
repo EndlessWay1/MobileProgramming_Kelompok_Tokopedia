@@ -7,7 +7,7 @@ import '../widgets/custom_text_field.dart';
 class RegisterPage extends StatefulWidget {
   final VoidCallback? onRegisterSuccess;
 
-  RegisterPage({this.onRegisterSuccess});
+  const RegisterPage({super.key, this.onRegisterSuccess});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -23,7 +23,6 @@ class _RegisterPageState extends State<RegisterPage> {
   bool loading = false;
   String errorText = '';
 
-  // TODO: tambahin konfirmasi password kalau perlu
   void daftar() async {
     var nama = namaC.text.trim();
     var email = emailC.text.trim();
@@ -79,7 +78,6 @@ class _RegisterPageState extends State<RegisterPage> {
       password: pass,
       location: alamat,
     );
-    print('register berhasil: $nama');
 
     if (!mounted) return;
     setState(() {

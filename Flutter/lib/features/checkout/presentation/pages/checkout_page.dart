@@ -14,15 +14,15 @@ class CheckoutPage extends StatefulWidget {
   final String? brand;
   final String? thumbnail;
 
-  CheckoutPage({
-    Key? key,
+  const CheckoutPage({
+    super.key,
     this.products,
     this.items,
     this.title,
     this.price,
     this.brand,
     this.thumbnail,
-  }) : super(key: key);
+  });
 
   @override
   State<CheckoutPage> createState() => _CheckoutPageState();
@@ -60,7 +60,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   void loadUser() async {
     var data = await ProfileStorage.getProfile();
-    print('data profile: $data');
     var name = (data['username'] ?? '').trim();
 
     if (!mounted) return;
@@ -100,7 +99,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   void bayarSekarang(int totalBayar, int totalQty) async {
-    print('bayar sekarang: $totalBayar');
 
     var sekarang = DateTime.now();
     var durasi = getDurasiKurir(kurir);
@@ -229,7 +227,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       },
                     ),
 
-                  // TODO: nanti tambah pilihan metode pembayaran (transfer / e-wallet)
                   Container(
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(

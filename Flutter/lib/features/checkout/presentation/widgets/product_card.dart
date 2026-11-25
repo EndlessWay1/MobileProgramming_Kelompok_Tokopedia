@@ -49,12 +49,12 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onRemove;
 
-  ProductCard({
-    Key? key,
+  const ProductCard({
+    super.key,
     required this.item,
     required this.onAdd,
     required this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -112,7 +112,6 @@ class ProductCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // TODO: tambahin tombol hapus kalau qty 0
               IconButton(
                 icon: Icon(Icons.remove_circle_outline, color: AppColors.deepGreen, size: 22),
                 onPressed: onRemove,
