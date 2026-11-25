@@ -1,17 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:aplikasi_tokped/core/app_colors.dart';
+import 'package:aplikasi_tokped/features/checkout/presentation/widgets/product_card.dart';
+import 'package:aplikasi_tokped/features/profile/data/secure_storage.dart';
+import 'package:aplikasi_tokped/features/profile/presentation/pages/register_page.dart';
 
 class CheckoutPage extends StatefulWidget {
-  final String title;
-  final int price;
-  final String brand;
-  final String thumbnail;
+  final List<CheckoutItem>? products;
+  final List<CheckoutItem>? items;
+
+  final String? title;
+  final int? price;
+  final String? brand;
+  final String? thumbnail;
 
   const CheckoutPage({
     super.key,
-    required this.title,
-    required this.price,
-    required this.brand,
-    required this.thumbnail,
+    this.products,
+    this.items,
+    this.title,
+    this.price,
+    this.brand,
+    this.thumbnail,
   });
 
   @override
@@ -19,22 +28,127 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  int quantity = 1;
+  List<CheckoutItem> items = [];
+
   int shippingCost = 10000;
   String selectedShipping = 'Reguler';
 
+  bool _isLoading = true;
+  String _userName = '';
+  String _userLocation = '';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.products != null && widget.products!.isNotEmpty) {
+      items = List.from(widget.products!);
+    } else if (widget.items != null && widget.items!.isNotEmpty) {
+      items = List.from(widget.items!);
+    } else if (widget.title != null) {
+      items = [
+        CheckoutItem(
+          title: widget.title!,
+          price: widget.price ?? 0,
+          brand: widget.brand ?? '',
+          thumbnail: widget.thumbnail ?? '',
+          quantity: 1,
+        ),
+      ];
+    }
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final profile = await ProfileStorage.getProfile();
+    final username = profile['username']?.trim() ?? '';
+
+    if (username.isEmpty) {
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RegisterPage(
+            onRegisterSuccess: () {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CheckoutPage(
+                    products: widget.products,
+                    items: widget.items,
+                    title: widget.title,
+                    price: widget.price,
+                    brand: widget.brand,
+                    thumbnail: widget.thumbnail,
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _userName = username;
+      _userLocation = profile['location']?.trim() ?? '';
+      _isLoading = false;
+    });
+  }
+
+  int totalHarga() {
+    int total = 0;
+    for (var item in items) {
+      total += item.price * item.quantity;
+    }
+    return total;
+  }
+
+  int totalBarang() {
+    int total = 0;
+    for (var item in items) {
+      total += item.quantity;
+    }
+    return total;
+  }
+
+  String formatHarga(int angka) {
+    String str = angka.toString();
+    String hasil = '';
+    for (int i = 0; i < str.length; i++) {
+      if (i > 0 && (str.length - i) % 3 == 0) {
+        hasil += ',';
+      }
+      hasil += str[i];
+    }
+    return hasil;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final themeColor = Theme.of(context).primaryColor;
-    final int itemTotal = widget.price * quantity;
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: AppColors.paleMintWhite,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.deepGreen),
+        ),
+      );
+    }
+
+    const themeColor = AppColors.deepGreen;
+    final int itemTotal = totalHarga();
     final int totalBill = itemTotal + shippingCost;
 
     return Scaffold(
+      backgroundColor: AppColors.paleMintWhite,
       appBar: AppBar(
         title: const Text(
           'Checkout',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
+        backgroundColor: AppColors.deepGreen,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -42,169 +156,72 @@ class _CheckoutPageState extends State<CheckoutPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.all(16),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
+                    const Row(
                       children: [
-                        Icon(Icons.location_on_outlined, size: 20),
+                        Icon(Icons.location_on, size: 20, color: AppColors.deepGreen),
                         SizedBox(width: 8),
                         Text(
                           'Alamat Pengiriman',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkPine),
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Text(
-                      'Denzel Mark Wahyudi',
-                      style: TextStyle(fontWeight: FontWeight.w600),
+                      _userName.isNotEmpty ? _userName : 'Nama Penerima',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Pegangsaan Dua, Kec. Kelapa Gading, Kota Jakarta Utara, DKI Jakarta 14250',
-                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                      _userLocation.isNotEmpty ? _userLocation : 'Belum ada alamat pengiriman',
+                      style: const TextStyle(color: Colors.grey, fontSize: 13),
                     ),
                   ],
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+
+            for (int i = 0; i < items.length; i++)
+              ProductCard(
+                item: items[i],
+                onAdd: () {
+                  setState(() {
+                    items[i].quantity++;
+                  });
+                },
+                onRemove: () {
+                  if (items[i].quantity > 1) {
+                    setState(() {
+                      items[i].quantity--;
+                    });
+                  }
+                },
+              ),
+
+            const SizedBox(height: 12),
+
             Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.storefront, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${widget.brand} Official Store',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 24),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            widget.thumbnail,
-                            width: 70,
-                            height: 70,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: 70,
-                                height: 70,
-                                color: Colors.grey.shade200,
-                                child: const Icon(Icons.image, color: Colors.grey),
-                              );
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                widget.title,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Rp ${widget.price}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline),
-                          onPressed: () {
-                            if (quantity > 1) {
-                              setState(() {
-                                quantity--;
-                              });
-                            }
-                          },
-                        ),
-                        Text(
-                          '$quantity',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
-                          onPressed: () {
-                            setState(() {
-                              quantity++;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Pilihan Pengiriman',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    const SizedBox(height: 8),
                     ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        selectedShipping == 'Reguler'
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        color: themeColor,
-                      ),
-                      title: const Text('Reguler (Rp 10.000)'),
-                      subtitle: const Text('Estimasi 2-3 hari kerja'),
+                      title: const Text('Reguler (Rp 10,000)'),
+                      subtitle: const Text('Estimasi 2 menit'),
+                      trailing: selectedShipping == 'Reguler'
+                          ? const Icon(Icons.check, color: themeColor)
+                          : null,
                       onTap: () {
                         setState(() {
                           selectedShipping = 'Reguler';
@@ -213,15 +230,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       },
                     ),
                     ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        selectedShipping == 'Same Day'
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        color: themeColor,
-                      ),
-                      title: const Text('Same Day (Rp 20.000)'),
-                      subtitle: const Text('Estimasi tiba hari ini'),
+                      title: const Text('Fast (Rp 20,000)'),
+                      subtitle: const Text('Estimasi 1 menit'),
+                      trailing: selectedShipping == 'Same Day'
+                          ? const Icon(Icons.check, color: themeColor)
+                          : null,
                       onTap: () {
                         setState(() {
                           selectedShipping = 'Same Day';
@@ -230,15 +243,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       },
                     ),
                     ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        selectedShipping == 'Instant'
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        color: themeColor,
-                      ),
-                      title: const Text('Instant (Rp 30.000)'),
-                      subtitle: const Text('Estimasi 2-3 jam tiba'),
+                      title: const Text('Instant (Rp 30,000)'),
+                      subtitle: const Text('Estimasi 30 detik'),
+                      trailing: selectedShipping == 'Instant'
+                          ? const Icon(Icons.check, color: themeColor)
+                          : null,
                       onTap: () {
                         setState(() {
                           selectedShipping = 'Instant';
@@ -250,28 +259,24 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+
             Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
               child: Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Text(
                       'Ringkasan Pembayaran',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(height: 12),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Total Harga ($quantity barang)'),
-                        Text('Rp $itemTotal'),
+                        Text('Total Harga (${totalBarang()} barang)'),
+                        Text('Rp ${formatHarga(itemTotal)}'),
                       ],
                     ),
                     const SizedBox(height: 8),
@@ -279,7 +284,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text('Total Ongkos Kirim'),
-                        Text('Rp $shippingCost'),
+                        Text('Rp ${formatHarga(shippingCost)}'),
                       ],
                     ),
                     const Divider(height: 24),
@@ -291,8 +296,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                         ),
                         Text(
-                          'Rp $totalBill',
-                          style: TextStyle(
+                          'Rp ${formatHarga(totalBill)}',
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                             color: themeColor,
@@ -304,21 +309,16 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 ),
               ),
             ),
-            const SizedBox(height: 80),
+            const SizedBox(height: 20),
           ],
         ),
       ),
-      bottomSheet: Container(
+
+      bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           color: Colors.white,
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.05),
-              blurRadius: 10,
-              offset: Offset(0, -3),
-            ),
-          ],
+          border: Border(top: BorderSide(color: AppColors.softMint)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -329,30 +329,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
               children: [
                 const Text('Total Tagihan', style: TextStyle(fontSize: 12, color: Colors.grey)),
                 Text(
-                  'Rp $totalBill',
-                  style: TextStyle(
+                  'Rp ${formatHarga(totalBill)}',
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: themeColor,
+                    color: AppColors.deepGreen,
                   ),
                 ),
               ],
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: themeColor,
+                backgroundColor: AppColors.deepGreen,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
               ),
               onPressed: () {
                 showDialog(
                   context: context,
                   builder: (context) => AlertDialog(
                     title: const Text('Pembayaran Berhasil'),
-                    content: Text('Pesanan untuk $quantity barang berhasil dibuat!'),
+                    content: Text('Pesanan untuk ${totalBarang()} barang berhasil dibuat!'),
                     actions: [
                       TextButton(
                         onPressed: () {
@@ -365,10 +361,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   ),
                 );
               },
-              child: const Text(
-                'Bayar Sekarang',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
+              child: const Text('Bayar Sekarang'),
             ),
           ],
         ),

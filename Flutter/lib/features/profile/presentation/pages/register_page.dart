@@ -5,9 +5,9 @@ import '../../data/secure_storage.dart';
 import '../widgets/custom_text_field.dart';
 
 class RegisterPage extends StatefulWidget {
-  final VoidCallback onRegisterSuccess;
+  final VoidCallback? onRegisterSuccess;
 
-  const RegisterPage({super.key, required this.onRegisterSuccess});
+  const RegisterPage({super.key, this.onRegisterSuccess});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -70,7 +70,11 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       );
 
-      widget.onRegisterSuccess();
+      if (widget.onRegisterSuccess != null) {
+        widget.onRegisterSuccess!();
+      } else {
+        Navigator.pop(context);
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -94,6 +98,12 @@ class _RegisterPageState extends State<RegisterPage> {
         backgroundColor: AppColors.paleMintWhite,
         elevation: 0,
         automaticallyImplyLeading: false,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.darkPine),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
