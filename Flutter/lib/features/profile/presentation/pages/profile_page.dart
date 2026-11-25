@@ -78,7 +78,10 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (dialogCtx) {
         return AlertDialog(
-          title: Text('Konfirmasi Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+          title: Text(
+            'Konfirmasi Logout',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -105,7 +108,10 @@ class _ProfilePageState extends State<ProfilePage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
-              child: Text('Batal', style: TextStyle(color: AppColors.deepGreen)),
+              child: Text(
+                'Batal',
+                style: TextStyle(color: AppColors.deepGreen),
+              ),
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -124,14 +130,20 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: Text('Error'),
                       content: Text('Email dan password tidak boleh kosong!'),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(c), child: Text('OK')),
+                        TextButton(
+                          onPressed: () => Navigator.pop(c),
+                          child: Text('OK'),
+                        ),
                       ],
                     ),
                   );
                   return;
                 }
 
-                var sukses = await ProfileStorage.deleteProfile(inputEmail, inputPass);
+                var sukses = await ProfileStorage.deleteProfile(
+                  inputEmail,
+                  inputPass,
+                );
                 if (!mounted) return;
 
                 if (sukses) {
@@ -158,7 +170,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       title: Text('Gagal'),
                       content: Text('Email atau password salah!'),
                       actions: [
-                        TextButton(onPressed: () => Navigator.pop(c), child: Text('OK')),
+                        TextButton(
+                          onPressed: () => Navigator.pop(c),
+                          child: Text('OK'),
+                        ),
                       ],
                     ),
                   );
@@ -191,7 +206,9 @@ class _ProfilePageState extends State<ProfilePage> {
     if (isLoading) {
       return Scaffold(
         backgroundColor: AppColors.paleMintWhite,
-        body: Center(child: CircularProgressIndicator(color: AppColors.primaryGreen)),
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primaryGreen),
+        ),
       );
     }
 
@@ -220,7 +237,11 @@ class _ProfilePageState extends State<ProfilePage> {
         centerTitle: true,
         title: Text(
           'Profil Saya',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.darkPine),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkPine,
+          ),
         ),
       ),
       body: SingleChildScrollView(
@@ -230,12 +251,20 @@ class _ProfilePageState extends State<ProfilePage> {
             CircleAvatar(
               radius: 42,
               backgroundColor: AppColors.softMint,
-              child: Icon(Icons.person_rounded, size: 48, color: AppColors.deepGreen),
+              child: Icon(
+                Icons.person_rounded,
+                size: 48,
+                color: AppColors.deepGreen,
+              ),
             ),
             SizedBox(height: 14),
             Text(
               username,
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: AppColors.darkPine),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.darkPine,
+              ),
             ),
             SizedBox(height: 4),
             Text(
@@ -248,7 +277,9 @@ class _ProfilePageState extends State<ProfilePage> {
             Card(
               color: Colors.white,
               elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Padding(
                 padding: EdgeInsets.all(16),
                 child: Column(
@@ -265,7 +296,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             color: AppColors.darkPine,
                           ),
                         ),
-                        Icon(Icons.arrow_forward_ios, size: 15, color: AppColors.darkPine),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 15,
+                          color: AppColors.darkPine,
+                        ),
                       ],
                     ),
                     SizedBox(height: 16),
@@ -279,7 +314,11 @@ class _ProfilePageState extends State<ProfilePage> {
                               Stack(
                                 clipBehavior: Clip.none,
                                 children: [
-                                  Icon(Icons.local_shipping_outlined, size: 32, color: AppColors.darkPine),
+                                  Icon(
+                                    Icons.local_shipping_outlined,
+                                    size: 32,
+                                    color: AppColors.darkPine,
+                                  ),
                                   if (dikirimCount > 0)
                                     Positioned(
                                       right: -6,
@@ -289,14 +328,23 @@ class _ProfilePageState extends State<ProfilePage> {
                                         backgroundColor: Colors.redAccent,
                                         child: Text(
                                           '$dikirimCount',
-                                          style: TextStyle(fontSize: 10, color: Colors.white),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
                                 ],
                               ),
                               SizedBox(height: 6),
-                              Text('Dikirim', style: TextStyle(fontSize: 13, color: AppColors.darkPine)),
+                              Text(
+                                'Dikirim',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.darkPine,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -307,7 +355,11 @@ class _ProfilePageState extends State<ProfilePage> {
                               Stack(
                                 clipBehavior: Clip.none,
                                 children: [
-                                  Icon(Icons.assignment_turned_in_outlined, size: 32, color: AppColors.darkPine),
+                                  Icon(
+                                    Icons.assignment_turned_in_outlined,
+                                    size: 32,
+                                    color: AppColors.darkPine,
+                                  ),
                                   if (sudahTibaCount > 0)
                                     Positioned(
                                       right: -6,
@@ -317,14 +369,23 @@ class _ProfilePageState extends State<ProfilePage> {
                                         backgroundColor: Colors.redAccent,
                                         child: Text(
                                           '$sudahTibaCount',
-                                          style: TextStyle(fontSize: 10, color: Colors.white),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
                                 ],
                               ),
                               SizedBox(height: 6),
-                              Text('Sudah tiba', style: TextStyle(fontSize: 13, color: AppColors.darkPine)),
+                              Text(
+                                'Sudah tiba',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.darkPine,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -352,7 +413,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   CircleAvatar(
                     radius: 20,
                     backgroundColor: AppColors.softMint,
-                    child: Icon(Icons.location_on_outlined, color: AppColors.deepGreen),
+                    child: Icon(
+                      Icons.location_on_outlined,
+                      color: AppColors.deepGreen,
+                    ),
                   ),
                   SizedBox(width: 12),
                   Expanded(
@@ -361,12 +425,20 @@ class _ProfilePageState extends State<ProfilePage> {
                       children: [
                         Text(
                           'Alamat Pengiriman',
-                          style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkPine),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkPine,
+                          ),
                         ),
                         SizedBox(height: 4),
                         Text(
-                          location != '' ? location : 'Belum ada alamat pengiriman',
-                          style: TextStyle(fontSize: 13, color: AppColors.deepGreen),
+                          location != ''
+                              ? location
+                              : 'Belum ada alamat pengiriman',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.deepGreen,
+                          ),
                         ),
                       ],
                     ),
@@ -385,12 +457,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 icon: Icon(Icons.logout, color: Colors.redAccent, size: 20),
                 label: Text(
                   'Keluar dari Akun',
-                  style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 style: OutlinedButton.styleFrom(
                   backgroundColor: Colors.white,
                   side: BorderSide(color: Colors.redAccent),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
                 ),
               ),
             ),
@@ -405,7 +482,11 @@ class SheetPesanan extends StatefulWidget {
   final List<OrderData> orders;
   final bool sudahTiba;
 
-  const SheetPesanan({super.key, required this.orders, required this.sudahTiba});
+  const SheetPesanan({
+    super.key,
+    required this.orders,
+    required this.sudahTiba,
+  });
 
   @override
   State<SheetPesanan> createState() => _SheetPesananState();
@@ -479,13 +560,16 @@ class _SheetPesananState extends State<SheetPesanan> {
                       itemCount: list.length,
                       itemBuilder: (context, i) {
                         var order = list[i];
-                        var tgl = '${duaDigit(order.createdAt.day)}/${duaDigit(order.createdAt.month)}/${order.createdAt.year} ${duaDigit(order.createdAt.hour)}:${duaDigit(order.createdAt.minute)}';
+                        var tgl =
+                            '${duaDigit(order.createdAt.day)}/${duaDigit(order.createdAt.month)}/${order.createdAt.year} ${duaDigit(order.createdAt.hour)}:${duaDigit(order.createdAt.minute)}';
                         var statusText = '';
                         if (widget.sudahTiba) {
-                          statusText = 'Tiba ${duaDigit(order.arriveAt.hour)}:${duaDigit(order.arriveAt.minute)}:${duaDigit(order.arriveAt.second)}';
+                          statusText =
+                              'Tiba ${duaDigit(order.arriveAt.hour)}:${duaDigit(order.arriveAt.minute)}:${duaDigit(order.arriveAt.second)}';
                         } else {
                           var sisa = order.sisaWaktu;
-                          statusText = 'Sisa ${duaDigit(sisa.inMinutes)}:${duaDigit(sisa.inSeconds % 60)}';
+                          statusText =
+                              'Sisa ${duaDigit(sisa.inMinutes)}:${duaDigit(sisa.inSeconds % 60)}';
                         }
 
                         return Card(
@@ -497,11 +581,21 @@ class _SheetPesananState extends State<SheetPesanan> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    Text(tgl, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                                    Text(
+                                      tgl,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
                                     Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       decoration: BoxDecoration(
                                         color: AppColors.softMint,
                                         borderRadius: BorderRadius.circular(12),
@@ -518,10 +612,16 @@ class _SheetPesananState extends State<SheetPesanan> {
                                   ],
                                 ),
                                 SizedBox(height: 6),
-                                Text('Kurir: ${order.kurir}', style: TextStyle(fontWeight: FontWeight.w600)),
+                                Text(
+                                  'Kurir: ${order.kurir}',
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
                                 Text(
                                   'Alamat: ${order.alamat != '' ? order.alamat : '-'}',
-                                  style: TextStyle(fontSize: 12, color: Colors.grey[700]),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[700],
+                                  ),
                                 ),
                                 Divider(),
                                 for (var item in order.items)
@@ -535,18 +635,31 @@ class _SheetPesananState extends State<SheetPesanan> {
                                                 width: 45,
                                                 height: 45,
                                                 fit: BoxFit.cover,
-                                                errorBuilder: (c, e, s) => Icon(Icons.shopping_bag_outlined),
+                                                errorBuilder: (c, e, s) => Icon(
+                                                  Icons.shopping_bag_outlined,
+                                                ),
                                               )
-                                            : Icon(Icons.shopping_bag_outlined, size: 32),
+                                            : Icon(
+                                                Icons.shopping_bag_outlined,
+                                                size: 32,
+                                              ),
                                         SizedBox(width: 10),
                                         Expanded(
                                           child: Column(
-                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
                                             children: [
-                                              Text(item.title, maxLines: 1, overflow: TextOverflow.ellipsis),
+                                              Text(
+                                                item.title,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
                                               Text(
                                                 '${item.quantity}x Rp ${formatRp(item.price)}',
-                                                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey[600],
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -556,7 +669,8 @@ class _SheetPesananState extends State<SheetPesanan> {
                                   ),
                                 Divider(),
                                 Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text('Total Pembayaran'),
                                     Text(

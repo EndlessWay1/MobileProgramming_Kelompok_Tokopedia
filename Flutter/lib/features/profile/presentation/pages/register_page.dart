@@ -133,10 +133,7 @@ class _RegisterPageState extends State<RegisterPage> {
             ),
             SizedBox(height: 28),
 
-            CustomTextField(
-              controller: namaC,
-              hint: 'Username',
-            ),
+            CustomTextField(controller: namaC, hint: 'Username'),
             SizedBox(height: 12),
 
             CustomTextField(

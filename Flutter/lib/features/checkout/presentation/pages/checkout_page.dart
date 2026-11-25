@@ -99,7 +99,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
   }
 
   void bayarSekarang(int totalBayar, int totalQty) async {
-
     var sekarang = DateTime.now();
     var durasi = getDurasiKurir(kurir);
 
@@ -153,7 +152,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
     if (isLoading) {
       return Scaffold(
         backgroundColor: AppColors.paleMintWhite,
-        body: Center(child: CircularProgressIndicator(color: AppColors.deepGreen)),
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.deepGreen),
+        ),
       );
     }
 
@@ -191,19 +192,33 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.location_on, size: 19, color: AppColors.deepGreen),
+                            Icon(
+                              Icons.location_on,
+                              size: 19,
+                              color: AppColors.deepGreen,
+                            ),
                             SizedBox(width: 6),
-                            Text('Alamat Pengiriman',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkPine)),
+                            Text(
+                              'Alamat Pengiriman',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkPine,
+                              ),
+                            ),
                           ],
                         ),
                         SizedBox(height: 8),
-                        Text(username != '' ? username : 'Nama Penerima',
-                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        Text(
+                          username != '' ? username : 'Nama Penerima',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         SizedBox(height: 3),
                         Text(
                           alamat != '' ? alamat : 'Belum ada alamat pengiriman',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -236,7 +251,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Pilihan Pengiriman', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        Text(
+                          'Pilihan Pengiriman',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
                         SizedBox(height: 8),
                         opsiKurir('Reguler', 'Estimasi 2 menit', 10000),
                         opsiKurir('Fast', 'Estimasi 1 menit', 20000),
@@ -255,7 +276,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Ringkasan Pembayaran', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        Text(
+                          'Ringkasan Pembayaran',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
                         SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -278,7 +305,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Total Tagihan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text(
+                              'Total Tagihan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                             Text(
                               'Rp ${formatRp(totalBayar)}',
                               style: TextStyle(
@@ -310,7 +343,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Total Tagihan', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                    Text(
+                      'Total Tagihan',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
                     Text(
                       'Rp ${formatRp(totalBayar)}',
                       style: TextStyle(
@@ -364,11 +400,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('$nama (Rp ${formatRp(harga)})', style: TextStyle(fontWeight: FontWeight.w500)),
-                Text(estimasi, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                Text(
+                  '$nama (Rp ${formatRp(harga)})',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  estimasi,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
               ],
             ),
-            if (dipilih) Icon(Icons.check_circle, color: AppColors.deepGreen, size: 20),
+            if (dipilih)
+              Icon(Icons.check_circle, color: AppColors.deepGreen, size: 20),
           ],
         ),
       ),

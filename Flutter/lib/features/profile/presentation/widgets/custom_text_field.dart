@@ -10,7 +10,8 @@ class CustomTextField extends StatelessWidget {
   final TextInputType? type;
   final Widget? suffix;
 
-  CustomTextField({
+  const CustomTextField({
+    super.key,
     required this.controller,
     required this.hint,
     this.icon,

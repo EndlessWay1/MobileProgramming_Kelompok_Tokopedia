@@ -74,8 +74,13 @@ class ProductCard extends StatelessWidget {
               Icon(Icons.store, size: 17, color: AppColors.deepGreen),
               SizedBox(width: 6),
               Text(
-                item.brand == '' ? 'Official Store' : '${item.brand} Official Store',
-                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkPine),
+                item.brand == ''
+                    ? 'Official Store'
+                    : '${item.brand} Official Store',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkPine,
+                ),
               ),
             ],
           ),
@@ -94,7 +99,13 @@ class ProductCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                    Text(
+                      item.title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     SizedBox(height: 6),
                     Text(
                       'Rp ${formatRp(item.price)}',
@@ -113,7 +124,11 @@ class ProductCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               IconButton(
-                icon: Icon(Icons.remove_circle_outline, color: AppColors.deepGreen, size: 22),
+                icon: Icon(
+                  Icons.remove_circle_outline,
+                  color: AppColors.deepGreen,
+                  size: 22,
+                ),
                 onPressed: onRemove,
               ),
               Text(
@@ -121,7 +136,11 @@ class ProductCard extends StatelessWidget {
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
               IconButton(
-                icon: Icon(Icons.add_circle_outline, color: AppColors.deepGreen, size: 22),
+                icon: Icon(
+                  Icons.add_circle_outline,
+                  color: AppColors.deepGreen,
+                  size: 22,
+                ),
                 onPressed: onAdd,
               ),
             ],
