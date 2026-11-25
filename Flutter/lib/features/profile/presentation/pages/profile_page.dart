@@ -358,18 +358,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
                         _buildTransactionButton(
-                          icon: Icons.inventory_2_outlined,
-                          label: 'Diproses',
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Menu pesanan diproses'),
-                                duration: Duration(seconds: 1),
-                              ),
-                            );
-                          },
-                        ),
-                        _buildTransactionButton(
                           icon: Icons.local_shipping_outlined,
                           label: 'Dikirim',
                           onTap: () {
