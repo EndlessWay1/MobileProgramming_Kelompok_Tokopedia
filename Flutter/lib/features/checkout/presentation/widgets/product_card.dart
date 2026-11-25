@@ -24,10 +24,24 @@ class CheckoutItem {
 
 // format ribuan pake titik
 String formatRp(int angka) {
-  return angka.toString().replaceAllMapped(
-    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-    (m) => '${m[1]}.',
-  );
+  bool minus = angka < 0;
+  String teks = angka.abs().toString();
+  String hasil = '';
+  int hitung = 0;
+
+  for (int i = teks.length - 1; i >= 0; i--) {
+    hasil = teks[i] + hasil;
+    hitung++;
+    if (hitung == 3 && i != 0) {
+      hasil = '.$hasil';
+      hitung = 0;
+    }
+  }
+
+  if (minus) {
+    return '-$hasil';
+  }
+  return hasil;
 }
 
 class ProductCard extends StatelessWidget {
@@ -35,12 +49,12 @@ class ProductCard extends StatelessWidget {
   final VoidCallback onAdd;
   final VoidCallback onRemove;
 
-  ProductCard({
-    Key? key,
+  const ProductCard({
+    super.key,
     required this.item,
     required this.onAdd,
     required this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -60,8 +74,13 @@ class ProductCard extends StatelessWidget {
               Icon(Icons.store, size: 17, color: AppColors.deepGreen),
               SizedBox(width: 6),
               Text(
-                item.brand == '' ? 'Official Store' : '${item.brand} Official Store',
-                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkPine),
+                item.brand == ''
+                    ? 'Official Store'
+                    : '${item.brand} Official Store',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.darkPine,
+                ),
               ),
             ],
           ),
@@ -80,7 +99,13 @@ class ProductCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(item.title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+                    Text(
+                      item.title,
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
                     SizedBox(height: 6),
                     Text(
                       'Rp ${formatRp(item.price)}',
@@ -98,9 +123,12 @@ class ProductCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // TODO: tambahin tombol hapus kalau qty 0
               IconButton(
-                icon: Icon(Icons.remove_circle_outline, color: AppColors.deepGreen, size: 22),
+                icon: Icon(
+                  Icons.remove_circle_outline,
+                  color: AppColors.deepGreen,
+                  size: 22,
+                ),
                 onPressed: onRemove,
               ),
               Text(
@@ -108,7 +136,11 @@ class ProductCard extends StatelessWidget {
                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
               ),
               IconButton(
-                icon: Icon(Icons.add_circle_outline, color: AppColors.deepGreen, size: 22),
+                icon: Icon(
+                  Icons.add_circle_outline,
+                  color: AppColors.deepGreen,
+                  size: 22,
+                ),
                 onPressed: onAdd,
               ),
             ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:aplikasi_tokped/core/app_colors.dart';
+import 'package:aplikasi_tokped/features/checkout/data/order_storage.dart';
 import 'package:aplikasi_tokped/features/checkout/presentation/widgets/product_card.dart';
 import 'package:aplikasi_tokped/features/profile/data/secure_storage.dart';
 import 'package:aplikasi_tokped/features/profile/presentation/pages/register_page.dart';
@@ -13,15 +14,15 @@ class CheckoutPage extends StatefulWidget {
   final String? brand;
   final String? thumbnail;
 
-  CheckoutPage({
-    Key? key,
+  const CheckoutPage({
+    super.key,
     this.products,
     this.items,
     this.title,
     this.price,
     this.brand,
     this.thumbnail,
-  }) : super(key: key);
+  });
 
   @override
   State<CheckoutPage> createState() => _CheckoutPageState();
@@ -59,8 +60,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
   void loadUser() async {
     var data = await ProfileStorage.getProfile();
-    print('data profile: $data');
     var name = (data['username'] ?? '').trim();
+
+    if (!mounted) return;
 
     // kalau belum login suruh daftar dulu
     if (name == '') {
@@ -86,12 +88,73 @@ class _CheckoutPageState extends State<CheckoutPage> {
     return hasil;
   }
 
+  Duration getDurasiKurir(String namaKurir) {
+    if (namaKurir == 'Instant') {
+      return Duration(seconds: 30);
+    } else if (namaKurir == 'Fast') {
+      return Duration(minutes: 1);
+    } else {
+      return Duration(minutes: 2);
+    }
+  }
+
+  void bayarSekarang(int totalBayar, int totalQty) async {
+    var sekarang = DateTime.now();
+    var durasi = getDurasiKurir(kurir);
+
+    List<OrderItem> listBarang = [];
+    for (var barang in items) {
+      listBarang.add(
+        OrderItem(
+          title: barang.title,
+          price: barang.price,
+          brand: barang.brand,
+          thumbnail: barang.thumbnail,
+          quantity: barang.quantity,
+        ),
+      );
+    }
+
+    var order = OrderData(
+      id: sekarang.millisecondsSinceEpoch.toString(),
+      items: listBarang,
+      kurir: kurir,
+      ongkir: ongkir,
+      totalBayar: totalBayar,
+      alamat: alamat,
+      createdAt: sekarang,
+      arriveAt: sekarang.add(durasi),
+    );
+
+    await OrderStorage.saveOrder(order);
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Pembayaran Berhasil'),
+        content: Text('Pesanan untuk $totalQty barang berhasil dibuat!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+            },
+            child: Text('Selesai'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
         backgroundColor: AppColors.paleMintWhite,
-        body: Center(child: CircularProgressIndicator(color: AppColors.deepGreen)),
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.deepGreen),
+        ),
       );
     }
 
@@ -129,27 +192,41 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.location_on, size: 19, color: AppColors.deepGreen),
+                            Icon(
+                              Icons.location_on,
+                              size: 19,
+                              color: AppColors.deepGreen,
+                            ),
                             SizedBox(width: 6),
-                            Text('Alamat Pengiriman',
-                                style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.darkPine)),
+                            Text(
+                              'Alamat Pengiriman',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkPine,
+                              ),
+                            ),
                           ],
                         ),
                         SizedBox(height: 8),
-                        Text(username != '' ? username : 'Nama Penerima',
-                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        Text(
+                          username != '' ? username : 'Nama Penerima',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
                         SizedBox(height: 3),
                         Text(
                           alamat != '' ? alamat : 'Belum ada alamat pengiriman',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   SizedBox(height: 12),
 
-                  ...items.map((barang) {
-                    return ProductCard(
+                  for (var barang in items)
+                    ProductCard(
                       item: barang,
                       onAdd: () {
                         setState(() {
@@ -163,10 +240,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           });
                         }
                       },
-                    );
-                  }),
+                    ),
 
-                  // TODO: nanti tambah pilihan metode pembayaran (transfer / e-wallet)
                   Container(
                     padding: EdgeInsets.all(12),
                     decoration: BoxDecoration(
@@ -176,7 +251,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Pilihan Pengiriman', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        Text(
+                          'Pilihan Pengiriman',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
                         SizedBox(height: 8),
                         opsiKurir('Reguler', 'Estimasi 2 menit', 10000),
                         opsiKurir('Fast', 'Estimasi 1 menit', 20000),
@@ -195,7 +276,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Ringkasan Pembayaran', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                        Text(
+                          'Ringkasan Pembayaran',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
                         SizedBox(height: 10),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -218,7 +305,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('Total Tagihan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                            Text(
+                              'Total Tagihan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
                             Text(
                               'Rp ${formatRp(totalBayar)}',
                               style: TextStyle(
@@ -250,7 +343,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Total Tagihan', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                    Text(
+                      'Total Tagihan',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                    ),
                     Text(
                       'Rp ${formatRp(totalBayar)}',
                       style: TextStyle(
@@ -267,24 +363,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                     foregroundColor: Colors.white,
                   ),
                   onPressed: () {
-                    print('bayar sekarang: $totalBayar');
-                    // sementara pake dialog aja dulu
-                    showDialog(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: Text('Pembayaran Berhasil'),
-                        content: Text('Pesanan untuk $totalQty barang berhasil dibuat!'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                              Navigator.pop(context);
-                            },
-                            child: Text('Selesai'),
-                          ),
-                        ],
-                      ),
-                    );
+                    bayarSekarang(totalBayar, totalQty);
                   },
                   child: Text('Bayar Sekarang'),
                 ),
@@ -321,11 +400,18 @@ class _CheckoutPageState extends State<CheckoutPage> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('$nama (Rp ${formatRp(harga)})', style: TextStyle(fontWeight: FontWeight.w500)),
-                Text(estimasi, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                Text(
+                  '$nama (Rp ${formatRp(harga)})',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  estimasi,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                ),
               ],
             ),
-            if (dipilih) Icon(Icons.check_circle, color: AppColors.deepGreen, size: 20),
+            if (dipilih)
+              Icon(Icons.check_circle, color: AppColors.deepGreen, size: 20),
           ],
         ),
       ),
