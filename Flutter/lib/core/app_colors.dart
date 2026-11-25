@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class ProfileColors {
+class AppColors {
   static const Color darkPine = Color(0xFF05150E);
   static const Color deepGreen = Color(0xFF165F42);
   static const Color primaryGreen = Color(0xFF28A976);

@@ -1,13 +1,13 @@
+import 'package:aplikasi_tokped/core/app_colors.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/secure_storage.dart';
-import '../widgets/colors.dart';
 import '../widgets/custom_text_field.dart';
 
 class RegisterPage extends StatefulWidget {
-  final VoidCallback onRegisterSuccess;
+  final VoidCallback? onRegisterSuccess;
 
-  const RegisterPage({super.key, required this.onRegisterSuccess});
+  const RegisterPage({super.key, this.onRegisterSuccess});
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -66,11 +66,15 @@ class _RegisterPageState extends State<RegisterPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Registrasi berhasil!'),
-          backgroundColor: ProfileColors.primaryGreen,
+          backgroundColor: AppColors.primaryGreen,
         ),
       );
 
-      widget.onRegisterSuccess();
+      if (widget.onRegisterSuccess != null) {
+        widget.onRegisterSuccess!();
+      } else {
+        Navigator.pop(context);
+      }
     } catch (e) {
       if (!mounted) return;
       setState(() {
@@ -89,11 +93,17 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: ProfileColors.paleMintWhite,
+      backgroundColor: AppColors.paleMintWhite,
       appBar: AppBar(
-        backgroundColor: ProfileColors.paleMintWhite,
+        backgroundColor: AppColors.paleMintWhite,
         elevation: 0,
         automaticallyImplyLeading: false,
+        leading: Navigator.canPop(context)
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.darkPine),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -109,12 +119,12 @@ class _RegisterPageState extends State<RegisterPage> {
                   width: 52,
                   height: 52,
                   decoration: const BoxDecoration(
-                    color: ProfileColors.softMint,
+                    color: AppColors.softMint,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.person_rounded,
-                    color: ProfileColors.deepGreen,
+                    color: AppColors.deepGreen,
                     size: 30,
                   ),
                 ),
@@ -126,7 +136,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.bold,
-                    color: ProfileColors.darkPine,
+                    color: AppColors.darkPine,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -135,7 +145,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    color: ProfileColors.deepGreen,
+                    color: AppColors.deepGreen,
                   ),
                 ),
 
@@ -191,8 +201,8 @@ class _RegisterPageState extends State<RegisterPage> {
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
                       color: _obscurePassword
-                          ? ProfileColors.deepGreen
-                          : ProfileColors.mintAccent,
+                          ? AppColors.deepGreen
+                          : AppColors.mintAccent,
                       size: 20,
                     ),
                     onPressed: () {
@@ -226,9 +236,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   child: ElevatedButton(
                     onPressed: _isLoading ? null : _handleRegister,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: ProfileColors.primaryGreen,
+                      backgroundColor: AppColors.primaryGreen,
                       foregroundColor: Colors.white,
-                      disabledBackgroundColor: ProfileColors.softMint,
+                      disabledBackgroundColor: AppColors.softMint,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),

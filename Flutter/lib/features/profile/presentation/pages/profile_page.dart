@@ -1,7 +1,7 @@
+import 'package:aplikasi_tokped/core/app_colors.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/secure_storage.dart';
-import '../widgets/colors.dart';
 import '../widgets/custom_text_field.dart';
 import 'register_page.dart';
 
@@ -64,7 +64,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
-                  color: ProfileColors.darkPine,
+                  color: AppColors.darkPine,
                 ),
               ),
               content: SingleChildScrollView(
@@ -75,7 +75,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     const Text(
                       'Masukkan email dan password akun Anda untuk verifikasi logout.',
                       style: TextStyle(
-                        color: ProfileColors.deepGreen,
+                        color: AppColors.deepGreen,
                         fontSize: 13,
                         height: 1.4,
                       ),
@@ -88,7 +88,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       keyboardType: TextInputType.emailAddress,
                       prefixIcon: const Icon(
                         Icons.email_outlined,
-                        color: ProfileColors.deepGreen,
+                        color: AppColors.deepGreen,
                         size: 20,
                       ),
                     ),
@@ -101,7 +101,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       obscureText: obscurePassword,
                       prefixIcon: const Icon(
                         Icons.lock_outline,
-                        color: ProfileColors.deepGreen,
+                        color: AppColors.deepGreen,
                         size: 20,
                       ),
                       suffixIcon: IconButton(
@@ -109,7 +109,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           obscurePassword
                               ? Icons.visibility_off_outlined
                               : Icons.visibility_outlined,
-                          color: ProfileColors.deepGreen,
+                          color: AppColors.deepGreen,
                           size: 20,
                         ),
                         onPressed: () {
@@ -140,7 +140,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   onPressed: () => Navigator.pop(dialogContext),
                   child: const Text(
                     'Batal',
-                    style: TextStyle(color: ProfileColors.deepGreen),
+                    style: TextStyle(color: AppColors.deepGreen),
                   ),
                 ),
                 ElevatedButton(
@@ -168,7 +168,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Berhasil keluar akun'),
-                          backgroundColor: ProfileColors.primaryGreen,
+                          backgroundColor: AppColors.primaryGreen,
                         ),
                       );
 
@@ -216,14 +216,14 @@ class _ProfilePageState extends State<ProfilePage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 32, color: ProfileColors.darkPine),
+            Icon(icon, size: 32, color: AppColors.darkPine),
             const SizedBox(height: 8),
             Text(
               label,
               style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w500,
-                color: ProfileColors.darkPine,
+                color: AppColors.darkPine,
               ),
             ),
           ],
@@ -236,9 +236,9 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return const Scaffold(
-        backgroundColor: ProfileColors.paleMintWhite,
+        backgroundColor: AppColors.paleMintWhite,
         body: Center(
-          child: CircularProgressIndicator(color: ProfileColors.primaryGreen),
+          child: CircularProgressIndicator(color: AppColors.primaryGreen),
         ),
       );
     }
@@ -249,9 +249,9 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
-      backgroundColor: ProfileColors.paleMintWhite,
+      backgroundColor: AppColors.paleMintWhite,
       appBar: AppBar(
-        backgroundColor: ProfileColors.paleMintWhite,
+        backgroundColor: AppColors.paleMintWhite,
         elevation: 0,
         centerTitle: true,
         title: const Text(
@@ -259,7 +259,7 @@ class _ProfilePageState extends State<ProfilePage> {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: ProfileColors.darkPine,
+            color: AppColors.darkPine,
           ),
         ),
       ),
@@ -275,11 +275,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 width: 86,
                 height: 86,
                 decoration: BoxDecoration(
-                  color: ProfileColors.softMint,
+                  color: AppColors.softMint,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: ProfileColors.deepGreen,
+                      color: AppColors.deepGreen,
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -288,7 +288,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: const Icon(
                   Icons.person_rounded,
                   size: 50,
-                  color: ProfileColors.deepGreen,
+                  color: AppColors.deepGreen,
                 ),
               ),
 
@@ -299,7 +299,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: ProfileColors.darkPine,
+                  color: AppColors.darkPine,
                 ),
               ),
 
@@ -309,7 +309,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _email,
                 style: const TextStyle(
                   fontSize: 14,
-                  color: ProfileColors.deepGreen,
+                  color: AppColors.deepGreen,
                 ),
               ),
 
@@ -341,13 +341,13 @@ class _ProfilePageState extends State<ProfilePage> {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: ProfileColors.darkPine,
+                            color: AppColors.darkPine,
                           ),
                         ),
                         Icon(
                           Icons.arrow_forward_ios_rounded,
                           size: 16,
-                          color: ProfileColors.darkPine,
+                          color: AppColors.darkPine,
                         ),
                       ],
                     ),
@@ -422,12 +422,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                        color: ProfileColors.softMint,
+                        color: AppColors.softMint,
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
                         Icons.location_on_outlined,
-                        color: ProfileColors.deepGreen,
+                        color: AppColors.deepGreen,
                         size: 24,
                       ),
                     ),
@@ -441,7 +441,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             style: TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.bold,
-                              color: ProfileColors.darkPine,
+                              color: AppColors.darkPine,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -451,7 +451,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 : 'Belum ada alamat pengiriman',
                             style: const TextStyle(
                               fontSize: 13,
-                              color: ProfileColors.deepGreen,
+                              color: AppColors.deepGreen,
                               height: 1.3,
                             ),
                           ),

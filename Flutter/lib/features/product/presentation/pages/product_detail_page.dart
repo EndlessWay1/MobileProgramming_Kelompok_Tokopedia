@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:aplikasi_tokped/features/checkout/presentation/pages/checkout_page.dart';
 import 'package:aplikasi_tokped/features/cart/data/cart_controller.dart';
 import 'package:aplikasi_tokped/features/cart/presentation/pages/cart_page.dart';
+import 'package:aplikasi_tokped/features/profile/data/secure_storage.dart';
+import 'package:aplikasi_tokped/features/profile/presentation/pages/register_page.dart';
 import 'package:aplikasi_tokped/models/shopping_item.dart';
 
 class MockProductItem {
@@ -353,7 +355,36 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                onPressed: () {
+                onPressed: () async {
+                  final profile = await ProfileStorage.getProfile();
+                  final username = profile['username']?.trim() ?? '';
+                  if (!context.mounted) return;
+
+                  if (username.isEmpty) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => RegisterPage(
+                          onRegisterSuccess: () {
+                            Navigator.pop(context);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CheckoutPage(
+                                  title: item.title,
+                                  price: discountedPrice,
+                                  brand: item.brand,
+                                  thumbnail: item.thumbnail,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
