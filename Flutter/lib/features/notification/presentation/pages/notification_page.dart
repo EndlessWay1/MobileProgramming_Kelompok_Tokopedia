@@ -1,179 +1,390 @@
 import 'package:flutter/material.dart';
-import '../widgets/notification_categories.dart';
 
-class NotificationPage extends StatelessWidget {
+import '../../data/notification_data.dart';
+import '../widgets/notification_categories.dart';
+import '../../../../core/theme/appColors.dart';
+import '../widgets/notification_item.dart';
+
+class NotificationPage extends StatefulWidget {
   const NotificationPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      //header
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.white,
-        centerTitle: true,
-        elevation: 0,
-
-        title: const Text(
-          'Notifikasi',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-        ),
-
-        actions: const [
-          NotificationHeaderIcon(
-            icon: Icons.shopping_cart_outlined,
-            count: 2,
-          ),
-
-          NotificationHeaderIcon(
-            icon: Icons.chat_bubble_outline, 
-            count: 3
-          ),
-
-          SizedBox(width: 12),
-        ],
-      ),
-
-      body: ListView(
-        padding: EdgeInsets.zero,
-
-        children: [
-          //status pesanan
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 18, 16, 12),
-
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Status Pesanan',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                ),
-
-                Row(
-                  children: const [
-                    Text(
-                      'Lihat Semua',
-                      style: TextStyle(color: Colors.black54, fontSize: 13),
-                    ),
-
-                    Icon(Icons.chevron_right, color: Colors.grey),
-                  ],
-                ),
-              ],
-            ),
-          ),
-
-          const OrderStatusCard(),
-
-          const SizedBox(height: 18),
-
-          Container(height: 9, 
-          color: const Color.fromARGB(255, 242, 243, 242)
-          ),
-
-          const NotificationCategories(),
-        ],
-      ),
-    );
-  }
+  State<NotificationPage> createState() => _NotificationPageState();
 }
 
-class NotificationHeaderIcon extends StatelessWidget {
-  final IconData icon;
-  final int count;
+class _NotificationPageState extends State<NotificationPage> {
+  late List<NotificationData> _notifications;
 
-  const NotificationHeaderIcon({
-    super.key,
-    required this.icon,
-    required this.count,
-  });
+  NotificationCategory? _selectedCategory;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // sementara pake data preview
+    _notifications = List.of(notificationSamples);
+  }
+
+  bool get _hasUnread {
+    return _notifications.any((notification) => !notification.isRead);
+  }
+
+  List<NotificationData> get _filteredNotifications {
+    final result = _notifications.where((notification) {
+      if (_selectedCategory == null) {
+        return true;
+      }
+
+      return notification.category == _selectedCategory;
+    }).toList();
+
+    result.sort(
+      (a, b) => b.createdAt.compareTo(a.createdAt),
+    );
+
+    return result;
+  }
+
+  void _markAllAsRead() {
+    if (!_hasUnread) return;
+
+    setState(() {
+      _notifications = _notifications.map((notification) {
+        return notification.copyWith(isRead: true);
+      }).toList();
+    });
+  }
+
+  void _markAsRead(String id) {
+    final index = _notifications.indexWhere(
+      (notification) => notification.id == id,
+    );
+
+    if (index == -1 || _notifications[index].isRead) {
+      return;
+    }
+
+    setState(() {
+      _notifications[index] =
+          _notifications[index].copyWith(isRead: true);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 12),
-      child: Badge(
-        isLabelVisible: count > 0,
+    final visibleNotifications = _filteredNotifications;
 
-        label: Text('$count'),
+    return Scaffold(
+      backgroundColor: AppColors.paleMint,
 
-        backgroundColor: const Color.fromARGB(255, 240, 106, 62),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
 
-        textColor: Colors.white,
-
-        child: Icon(
-          icon,
-          size: 25,
-          color: const Color.fromARGB(255, 16, 134, 77),
+        title: const Text(
+          'Notifikasi',
+          style: TextStyle(
+            color: AppColors.darkPine,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
+
+        bottom: const PreferredSize(
+          preferredSize: Size.fromHeight(1),
+          child: Divider(
+            height: 1,
+            thickness: 1,
+            color: AppColors.border,
+          ),
+        ),
+      ),
+
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 18, 16, 30),
+
+        children: [
+          // Ringkasan pesanan
+          const _OrderProgressCard(),
+
+          const SizedBox(height: 24),
+
+          // Judul dan tombol baca semua
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Update Terbaru',
+                style: TextStyle(
+                  color: AppColors.darkPine,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              TextButton.icon(
+                onPressed: _hasUnread ? _markAllAsRead : null,
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.primaryGreen,
+                  padding: EdgeInsets.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+                icon: const Icon(
+                  Icons.done_all_rounded,
+                  size: 17,
+                ),
+                label: const Text(
+                  'Baca semua',
+                  style: TextStyle(fontSize: 12),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          // Filter kategori
+          NotificationCategories(
+            selectedCategory: _selectedCategory,
+            onCategorySelected: (category) {
+              setState(() {
+                _selectedCategory = category;
+              });
+            },
+          ),
+
+          const SizedBox(height: 17),
+
+          // Daftar notifikasi
+          if (visibleNotifications.isEmpty)
+            const _EmptyNotificationState()
+          else
+            ...visibleNotifications.map((notification) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: NotificationItem(
+                  notification: notification,
+                  onTap: () {
+                    _markAsRead(notification.id);
+                  },
+                ),
+              );
+            }),
+        ],
       ),
     );
   }
 }
 
-//card status pesanan
-class OrderStatusCard extends StatelessWidget {
-  const OrderStatusCard({super.key});
+// Kartu ringkasan proses pesanan
+class _OrderProgressCard extends StatelessWidget {
+  const _OrderProgressCard();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-
-        border: Border.all(color: const Color.fromARGB(255, 232, 232, 232)),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: AppColors.border,
+        ),
       ),
 
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //informasi pesanan
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-
-              children: [
-                const Text(
-                  'Pesanan Telah Dikirim',
-                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+          Row(
+            children: [
+              Container(
+                width: 43,
+                height: 43,
+                decoration: BoxDecoration(
+                  color: AppColors.paleMint,
+                  borderRadius: BorderRadius.circular(13),
                 ),
-
-                const SizedBox(height: 10),
-
-                const Text(
-                  'Klik untuk melacak pesananmu',
-                  style: TextStyle(fontSize: 12, color: Colors.black54),
+                child: const Icon(
+                  Icons.inventory_2_outlined,
+                  color: AppColors.deepGreen,
+                  size: 23,
                 ),
+              ),
 
-                const SizedBox(height: 15),
-                const Text(
-                  'Kemarin, 11:57',
-                  style: TextStyle(fontSize: 11, color: Colors.grey),
+              const SizedBox(width: 12),
+
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Perjalanan Pesanan',
+                      style: TextStyle(
+                        color: AppColors.darkPine,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+
+                    SizedBox(height: 4),
+
+                    Text(
+                      'Pantau proses pesananmu dalam satu tempat.',
+                      style: TextStyle(
+                        color: AppColors.mutedText,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
+
+              const Icon(
+                Icons.arrow_forward_rounded,
+                color: AppColors.primaryGreen,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 18),
+
+          const Divider(
+            height: 1,
+            color: AppColors.border,
+          ),
+
+          const SizedBox(height: 15),
+
+          // tahapan pesanan
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _OrderStage(
+                icon: Icons.inventory_2_outlined,
+                label: 'Dikemas',
+              ),
+
+              _OrderConnector(),
+
+              _OrderStage(
+                icon: Icons.local_shipping_outlined,
+                label: 'Dikirim',
+              ),
+
+              _OrderConnector(),
+
+              _OrderStage(
+                icon: Icons.task_alt_outlined,
+                label: 'Selesai',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OrderStage extends StatelessWidget {
+  final IconData icon;
+  final String label;
+
+  const _OrderStage({
+    required this.icon,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          width: 35,
+          height: 35,
+          decoration: const BoxDecoration(
+            color: AppColors.paleMint,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: AppColors.deepGreen,
+          ),
+        ),
+
+        const SizedBox(height: 6),
+
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            color: AppColors.mutedText,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _OrderConnector extends StatelessWidget {
+  const _OrderConnector();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 25,
+      height: 2,
+      color: AppColors.softMint,
+      margin: const EdgeInsets.only(bottom: 20),
+    );
+  }
+}
+
+class _EmptyNotificationState extends StatelessWidget {
+  const _EmptyNotificationState();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 35,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: AppColors.border,
+        ),
+      ),
+      child: const Column(
+        children: [
+          Icon(
+            Icons.notifications_none_rounded,
+            size: 42,
+            color: AppColors.softMint,
+          ),
+
+          SizedBox(height: 12),
+
+          Text(
+            'Belum ada notifikasi',
+            style: TextStyle(
+              color: AppColors.darkPine,
+              fontWeight: FontWeight.bold,
             ),
           ),
 
-          const SizedBox(width: 12),
+          SizedBox(height: 5),
 
-          //placeholder gambar produk
-          Container(
-            width: 88,
-            height: 88,
-
-            decoration: BoxDecoration(
-              color: const Color.fromARGB(255, 231, 247, 236),
-              borderRadius: BorderRadius.circular(10),
-            ),
-
-            child: const Icon(
-              Icons.inventory_2_outlined,
-              size: 38,
-              color: Color.fromARGB(255, 12, 116, 66),
+          Text(
+            'Notifikasi untuk kategori ini akan muncul di sini.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.mutedText,
+              fontSize: 12,
             ),
           ),
         ],
