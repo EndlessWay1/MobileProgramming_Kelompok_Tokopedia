@@ -151,7 +151,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
-        backgroundColor: AppColors.paleMintWhite,
+        backgroundColor: AppColors.paleMint,
         body: Center(
           child: CircularProgressIndicator(color: AppColors.deepGreen),
         ),
@@ -166,7 +166,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.paleMintWhite,
+      backgroundColor: AppColors.paleMint,
       appBar: AppBar(
         title: Text('Checkout', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: AppColors.deepGreen,
@@ -392,7 +392,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
           border: Border.all(
             color: dipilih ? AppColors.deepGreen : Colors.grey.shade300,
           ),
-          color: dipilih ? AppColors.paleMintWhite : Colors.white,
+          color: dipilih ? AppColors.paleMint : Colors.white,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

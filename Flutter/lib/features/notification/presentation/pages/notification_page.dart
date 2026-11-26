@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/notification_data.dart';
 import '../widgets/notification_categories.dart';
-import '../../../../core/theme/appColors.dart';
+import 'package:aplikasi_tokped/core/app_colors.dart';
 import '../widgets/notification_item.dart';
 
 class NotificationPage extends StatefulWidget {

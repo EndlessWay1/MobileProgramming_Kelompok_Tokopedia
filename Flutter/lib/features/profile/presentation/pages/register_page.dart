@@ -101,9 +101,9 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.paleMintWhite,
+      backgroundColor: AppColors.paleMint,
       appBar: AppBar(
-        backgroundColor: AppColors.paleMintWhite,
+        backgroundColor: AppColors.paleMint,
         elevation: 0,
         iconTheme: IconThemeData(color: AppColors.darkPine),
       ),
