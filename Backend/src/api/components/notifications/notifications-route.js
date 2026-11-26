@@ -1,30 +1,26 @@
-const express = requires("express");
-const router = express.Router();
+import express from 'express';
 
-const notificationController = require("./notifications-controller");
+import {
+  filterNotifications,
+  findUnreadCount,
+  readNotification,
+  readAllNotifications,
+} from './notifications-controller.js';
 
-//mengambil jumlah notifikasi belum dibaca
-router.get(
-    "/unread-count",
-    notificationController.getUnreadCount
-);
+export default (app) => {
+  const route = express.Router();
 
-//ambil daftar notifikasi
-router.get(
-    "/",
-    notificationController.getNotifications
-);
+  app.use('/notifications', route);
 
-//menandai semua notifikasi sebagai dibaca
-router.patch(
-    "/read-all",
-    notificationController.markAllNotificationsAsRead
-);
+  // Mengambil jumlah notifikasi yang belum dibaca
+  route.get('/unread-count', findUnreadCount);
 
-//menandai satu notifikasi sebagai dibaca
-router.patch(
-    "/:id/read",
-    notificationController.markNotificationsAsRead
-);
+  // Mengambil semua notifikasi
+  route.get('/', filterNotifications);
 
-module.exports = router;
+  // Menandai semua notifikasi sudah dibaca
+  route.patch('/read-all', readAllNotifications);
+
+  // Menandai satu notifikasi sudah dibaca
+  route.patch('/:id/read', readNotification);
+};

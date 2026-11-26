@@ -1,7 +1,19 @@
 import dbExports from '../../../models/index.js';
 
+import {
+  createNotification,
+} from '../notifications/notifications-service.js';
+
 const { Items } = dbExports;
 
+// jika gagal membuat notifikasi, proses produk tetep jalan
+const createNotificationSafely = async(data) => {
+  try {
+    await createNotification(data);
+  } catch (error) {
+    console.error('Failed to create notification:', error);
+  }
+};
 // Get all items with filtering, searching, and pagination
 
 const getItems = async ({
@@ -76,15 +88,64 @@ const getItemById = async (id) => {
 
 // Create a new item
 const createItem = async (data) => {
-  return Items.create(data);
+  const item = await Items.create(data);
+
+  //notification ketika produk dibuat
+  await createNotificationSafely({
+    storeName: 'Info Toko',
+    title: 'Produk baru tersedia!',
+    message: `${item.title} sekarang sudah tersedia di toko kami.`,
+    category: 'store',
+    imageUrl: item.thumbnail || null,
+    relatedEntityType: `item`,
+    relatedEntityId: String(item._id),
+  });
+  return item;
 };
 
 // Update an existing item
 const updateItem = async (id, data) => {
-  return Items.findByIdAndUpdate(id, data, {
-    new: true,
-    runValidators: true,
-  });
+  const previousItem = await Items.findById(id).lean();
+
+  if (!previousItem) {
+    return null;
+  }
+
+  const updatedItem = await Items.findByIdAndUpdate(
+    id,
+    data,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+
+  if (!updatedItem){
+    return null;
+  }
+
+  const oldDiscount = Number(
+    previousItem.discountPercentage || 0
+  );
+
+  const newDiscount = Number(
+    updatedItem.discountPercentage || 0
+  );
+
+  // Notification jika diskon bertambah
+  if (newDiscount > oldDiscount && newDiscount > 0) {
+    await createNotificationSafely({
+      storeName: 'Promo Toko',
+      title: 'Promo spesial untukmu!',
+      message: `${updatedItem.title} sekarang mendapatkan diskon ${newDiscount}%.`,
+      category: 'promo',
+      imageUrl: updatedItem.thumbnail || null,
+      relatedEntityType: 'item',
+      relatedEntityId: String(updatedItem._id),
+    });
+  }
+
+  return updatedItem;
 };
 
 // Delete an item
