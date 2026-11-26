@@ -41,6 +41,7 @@ const markNotificationAsRead = async (id) => {
         },
         {
             new: true,
+            runValidators: true,
         },
     );
 };
