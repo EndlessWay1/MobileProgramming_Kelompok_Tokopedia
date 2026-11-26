@@ -1,17 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:aplikasi_tokped/core/app_colors.dart';
+import 'package:aplikasi_tokped/features/checkout/data/order_storage.dart';
+import 'package:aplikasi_tokped/features/checkout/presentation/widgets/product_card.dart';
+import 'package:aplikasi_tokped/features/profile/data/secure_storage.dart';
+import 'package:aplikasi_tokped/features/profile/presentation/pages/register_page.dart';
 
 class CheckoutPage extends StatefulWidget {
-  final String title;
-  final int price;
-  final String brand;
-  final String thumbnail;
+  final List<CheckoutItem>? products;
+  final List<CheckoutItem>? items;
+
+  final String? title;
+  final int? price;
+  final String? brand;
+  final String? thumbnail;
 
   const CheckoutPage({
     super.key,
-    this.title = 'Trail Running Shoe',
-    this.price = 145000,
-    this.brand = 'Northpeak',
-    this.thumbnail = 'https://trail-running-shoe.hostmora.app/trail-running-shoe1.jpg',
+    this.products,
+    this.items,
+    this.title,
+    this.price,
+    this.brand,
+    this.thumbnail,
   });
 
   @override
@@ -19,357 +29,389 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
-  int quantity = 1;
-  int shippingCost = 10000;
-  String selectedShipping = 'Reguler';
+  List<CheckoutItem> items = [];
+
+  int ongkir = 10000;
+  String kurir = 'Reguler';
+
+  bool isLoading = true;
+  String username = '';
+  String alamat = '';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.products != null && widget.products!.isNotEmpty) {
+      items = widget.products!;
+    } else if (widget.items != null && widget.items!.isNotEmpty) {
+      items = widget.items!;
+    } else if (widget.title != null) {
+      items.add(
+        CheckoutItem(
+          title: widget.title!,
+          price: widget.price ?? 0,
+          brand: widget.brand ?? '',
+          thumbnail: widget.thumbnail ?? '',
+        ),
+      );
+    }
+    loadUser();
+  }
+
+  void loadUser() async {
+    var data = await ProfileStorage.getProfile();
+    var name = (data['username'] ?? '').trim();
+
+    if (!mounted) return;
+
+    // kalau belum login suruh daftar dulu
+    if (name == '') {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => RegisterPage()),
+      );
+      return;
+    }
+
+    setState(() {
+      username = name;
+      alamat = (data['location'] ?? '').trim();
+      isLoading = false;
+    });
+  }
+
+  int getTotal() {
+    int hasil = 0;
+    for (var item in items) {
+      hasil += item.price * item.quantity;
+    }
+    return hasil;
+  }
+
+  Duration getDurasiKurir(String namaKurir) {
+    if (namaKurir == 'Instant') {
+      return Duration(seconds: 30);
+    } else if (namaKurir == 'Fast') {
+      return Duration(minutes: 1);
+    } else {
+      return Duration(minutes: 2);
+    }
+  }
+
+  void bayarSekarang(int totalBayar, int totalQty) async {
+    var sekarang = DateTime.now();
+    var durasi = getDurasiKurir(kurir);
+
+    List<OrderItem> listBarang = [];
+    for (var barang in items) {
+      listBarang.add(
+        OrderItem(
+          title: barang.title,
+          price: barang.price,
+          brand: barang.brand,
+          thumbnail: barang.thumbnail,
+          quantity: barang.quantity,
+        ),
+      );
+    }
+
+    var order = OrderData(
+      id: sekarang.millisecondsSinceEpoch.toString(),
+      items: listBarang,
+      kurir: kurir,
+      ongkir: ongkir,
+      totalBayar: totalBayar,
+      alamat: alamat,
+      createdAt: sekarang,
+      arriveAt: sekarang.add(durasi),
+    );
+
+    await OrderStorage.saveOrder(order);
+    if (!mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Pembayaran Berhasil'),
+        content: Text('Pesanan untuk $totalQty barang berhasil dibuat!'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.pop(context);
+            },
+            child: Text('Selesai'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    final themeColor = Theme.of(context).primaryColor;
-    final int itemTotal = widget.price * quantity;
-    final int totalBill = itemTotal + shippingCost;
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.paleMintWhite,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.deepGreen),
+        ),
+      );
+    }
+
+    int subtotal = getTotal();
+    int totalBayar = subtotal + ongkir;
+    int totalQty = 0;
+    for (var x in items) {
+      totalQty += x.quantity;
+    }
 
     return Scaffold(
+      backgroundColor: AppColors.paleMintWhite,
       appBar: AppBar(
-        title: const Text(
-          'Checkout',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text('Checkout', style: TextStyle(fontWeight: FontWeight.bold)),
+        backgroundColor: AppColors.deepGreen,
+        foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
-              child: const Padding(
-                padding: EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(Icons.location_on_outlined, size: 20),
-                        SizedBox(width: 8),
-                        Text(
-                          'Alamat Pengiriman',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
                     ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Denzel Mark Wahyudi',
-                      style: TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      'Pegangsaan Dua, Kec. Kelapa Gading, Kota Jakarta Utara, DKI Jakarta 14250',
-                      style: TextStyle(color: Colors.grey, fontSize: 13),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        const Icon(Icons.storefront, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${widget.brand} Official Store',
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const Divider(height: 24),
-                    Row(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            widget.thumbnail,
-                            width: 70,
-                            height: 70,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: 70,
-                                height: 70,
-                                color: Colors.grey.shade200,
-                                child: const Icon(Icons.image, color: Colors.grey),
-                              );
-                            },
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              size: 19,
+                              color: AppColors.deepGreen,
+                            ),
+                            SizedBox(width: 6),
+                            Text(
+                              'Alamat Pengiriman',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkPine,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          username != '' ? username : 'Nama Penerima',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        SizedBox(height: 3),
+                        Text(
+                          alamat != '' ? alamat : 'Belum ada alamat pengiriman',
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 13,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 12),
+
+                  for (var barang in items)
+                    ProductCard(
+                      item: barang,
+                      onAdd: () {
+                        setState(() {
+                          barang.quantity++;
+                        });
+                      },
+                      onRemove: () {
+                        if (barang.quantity > 1) {
+                          setState(() {
+                            barang.quantity--;
+                          });
+                        }
+                      },
+                    ),
+
+                  Container(
+                    padding: EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Pilihan Pengiriman',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        opsiKurir('Reguler', 'Estimasi 2 menit', 10000),
+                        opsiKurir('Fast', 'Estimasi 1 menit', 20000),
+                        opsiKurir('Instant', 'Estimasi 30 detik', 30000),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 12),
+
+                  Container(
+                    padding: EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Ringkasan Pembayaran',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Total Harga ($totalQty barang)'),
+                            Text('Rp ${formatRp(subtotal)}'),
+                          ],
+                        ),
+                        Padding(
+                          padding: EdgeInsets.only(top: 6),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                widget.title,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Rp ${widget.price}',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
-                              ),
+                              Text('Ongkos Kirim ($kurir)'),
+                              Text('Rp ${formatRp(ongkir)}'),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.remove_circle_outline),
-                          onPressed: () {
-                            if (quantity > 1) {
-                              setState(() {
-                                quantity--;
-                              });
-                            }
-                          },
-                        ),
-                        Text(
-                          '$quantity',
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.add_circle_outline),
-                          onPressed: () {
-                            setState(() {
-                              quantity++;
-                            });
-                          },
+                        Divider(height: 22),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Total Tagihan',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            Text(
+                              'Rp ${formatRp(totalBayar)}',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: AppColors.deepGreen,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: 10),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+          ),
+
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              border: Border(top: BorderSide(color: Colors.grey.shade300)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Pilihan Pengiriman',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    Text(
+                      'Total Tagihan',
+                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                     ),
-                    const SizedBox(height: 8),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        selectedShipping == 'Reguler'
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        color: themeColor,
+                    Text(
+                      'Rp ${formatRp(totalBayar)}',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.deepGreen,
                       ),
-                      title: const Text('Reguler (Rp 10.000)'),
-                      subtitle: const Text('Estimasi 2-3 hari kerja'),
-                      onTap: () {
-                        setState(() {
-                          selectedShipping = 'Reguler';
-                          shippingCost = 10000;
-                        });
-                      },
-                    ),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        selectedShipping == 'Same Day'
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        color: themeColor,
-                      ),
-                      title: const Text('Same Day (Rp 20.000)'),
-                      subtitle: const Text('Estimasi tiba hari ini'),
-                      onTap: () {
-                        setState(() {
-                          selectedShipping = 'Same Day';
-                          shippingCost = 20000;
-                        });
-                      },
-                    ),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: Icon(
-                        selectedShipping == 'Instant'
-                            ? Icons.radio_button_checked
-                            : Icons.radio_button_off,
-                        color: themeColor,
-                      ),
-                      title: const Text('Instant (Rp 30.000)'),
-                      subtitle: const Text('Estimasi 2-3 jam tiba'),
-                      onTap: () {
-                        setState(() {
-                          selectedShipping = 'Instant';
-                          shippingCost = 30000;
-                        });
-                      },
                     ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Card(
-              elevation: 0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-                side: BorderSide(color: Colors.grey.shade300),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Ringkasan Pembayaran',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Total Harga ($quantity barang)'),
-                        Text('Rp $itemTotal'),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Total Ongkos Kirim'),
-                        Text('Rp $shippingCost'),
-                      ],
-                    ),
-                    const Divider(height: 24),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Total Tagihan',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                        ),
-                        Text(
-                          'Rp $totalBill',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: themeColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.deepGreen,
+                    foregroundColor: Colors.white,
+                  ),
+                  onPressed: () {
+                    bayarSekarang(totalBayar, totalQty);
+                  },
+                  child: Text('Bayar Sekarang'),
                 ),
-              ),
+              ],
             ),
-            const SizedBox(height: 80),
-          ],
-        ),
+          ),
+        ],
       ),
-      bottomSheet: Container(
-        padding: const EdgeInsets.all(16),
+    );
+  }
+
+  Widget opsiKurir(String nama, String estimasi, int harga) {
+    bool dipilih = kurir == nama;
+    return InkWell(
+      onTap: () {
+        setState(() {
+          kurir = nama;
+          ongkir = harga;
+        });
+      },
+      child: Container(
+        margin: EdgeInsets.only(bottom: 6),
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: const [
-            BoxShadow(
-              color: Color.fromRGBO(0, 0, 0, 0.05),
-              blurRadius: 10,
-              offset: Offset(0, -3),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: dipilih ? AppColors.deepGreen : Colors.grey.shade300,
+          ),
+          color: dipilih ? AppColors.paleMintWhite : Colors.white,
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
-              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Total Tagihan', style: TextStyle(fontSize: 12, color: Colors.grey)),
                 Text(
-                  'Rp $totalBill',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: themeColor,
-                  ),
+                  '$nama (Rp ${formatRp(harga)})',
+                  style: TextStyle(fontWeight: FontWeight.w500),
+                ),
+                Text(
+                  estimasi,
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                 ),
               ],
             ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: themeColor,
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text('Pembayaran Berhasil'),
-                    content: Text('Pesanan untuk $quantity barang berhasil dibuat!'),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          Navigator.pop(context);
-                        },
-                        child: const Text('Selesai'),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: const Text(
-                'Bayar Sekarang',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ),
+            if (dipilih)
+              Icon(Icons.check_circle, color: AppColors.deepGreen, size: 20),
           ],
         ),
       ),

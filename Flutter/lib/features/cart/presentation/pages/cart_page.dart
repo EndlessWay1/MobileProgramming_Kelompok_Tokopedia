@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:aplikasi_tokped/features/cart/data/cart_controller.dart';
+import 'package:aplikasi_tokped/features/checkout/presentation/pages/checkout_page.dart';
+import 'package:aplikasi_tokped/features/checkout/presentation/widgets/product_card.dart';
 import 'package:aplikasi_tokped/features/product/presentation/pages/product_detail_page.dart';
+import 'package:aplikasi_tokped/features/profile/data/secure_storage.dart';
+import 'package:aplikasi_tokped/features/profile/presentation/pages/register_page.dart';
 
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
@@ -260,8 +264,54 @@ class CartPage extends StatelessWidget {
                   ),
                 ),
                 onPressed: cart.selectedCount > 0
-                    ? () {
+                    ? () async {
+                        final profile = await ProfileStorage.getProfile();
+                        final username = profile['username']?.trim() ?? '';
+                        if (!context.mounted) return;
+
+                        final checkoutItems = cart.selectedEntries
+                            .map(
+                              (e) => CheckoutItem(
+                                title: e.item.title,
+                                price: e.unitPrice,
+                                brand: e.item.brand,
+                                thumbnail: e.item.thumbnail,
+                                quantity: e.quantity,
+                              ),
+                            )
+                            .toList();
+
+                        if (username.isEmpty) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RegisterPage(
+                                onRegisterSuccess: () {
+                                  Navigator.pop(context);
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => CheckoutPage(
+                                        products: checkoutItems,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
                         // Checkout barang dikeranjang
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CheckoutPage(
+                              products: checkoutItems,
+                            ),
+                          ),
+                        );
                       }
                     : null,
                 child: Text('Checkout (${cart.selectedCount})'),

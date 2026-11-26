@@ -1,7 +1,11 @@
+import 'dart:async';
+
+import 'package:aplikasi_tokped/core/app_colors.dart';
+import 'package:aplikasi_tokped/features/checkout/data/order_storage.dart';
+import 'package:aplikasi_tokped/features/checkout/presentation/widgets/product_card.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/secure_storage.dart';
-import '../widgets/colors.dart';
 import '../widgets/custom_text_field.dart';
 import 'register_page.dart';
 
@@ -13,217 +17,458 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  String _username = '';
-  String _email = '';
-  String _location = '';
-  bool _isLoading = true;
-  bool _isRegistered = false;
+  String username = '';
+  String email = '';
+  String location = '';
+  bool isLoading = true;
+  bool sudahDaftar = false;
+
+  List<OrderData> orders = [];
+  Timer? timer;
 
   @override
   void initState() {
     super.initState();
-    _checkRegistrationAndLoad();
-  }
+    loadProfile();
+    loadOrders();
+    ProfileStorage.profileVersion.addListener(loadProfile);
+    OrderStorage.ordersVersion.addListener(loadOrders);
 
-  //pastikan ada data profil sebelum masuk, jika semua data akan kosong atau false
-  Future<void> _checkRegistrationAndLoad() async {
-    final profileData = await ProfileStorage.getProfile();
-    if (!mounted) return;
-
-    final username = profileData['username']?.trim() ?? '';
-    final isRegistered = username.isNotEmpty;
-
-    setState(() {
-      _isRegistered = isRegistered;
-      _username = isRegistered ? username : '';
-      _email = isRegistered ? (profileData['email'] ?? '') : '';
-      _location = isRegistered ? (profileData['location'] ?? '') : '';
-      _isLoading = false;
+    // cek tiap detik biar badge update kalau pesanan udah nyampe
+    timer = Timer.periodic(Duration(seconds: 1), (t) {
+      setState(() {});
     });
   }
 
-  //pop up saat logout
-  void _showLogoutDialog() {
-    final emailController = TextEditingController();
-    final passwordController = TextEditingController();
-    bool obscurePassword = true;
-    String? errorMessage;
+  @override
+  void dispose() {
+    timer?.cancel();
+    ProfileStorage.profileVersion.removeListener(loadProfile);
+    OrderStorage.ordersVersion.removeListener(loadOrders);
+    super.dispose();
+  }
+
+  void loadProfile() async {
+    var data = await ProfileStorage.getProfile();
+    if (!mounted) return;
+
+    var name = (data['username'] ?? '').trim();
+    setState(() {
+      sudahDaftar = name != '';
+      username = sudahDaftar ? name : '';
+      email = sudahDaftar ? (data['email'] ?? '') : '';
+      location = sudahDaftar ? (data['location'] ?? '') : '';
+      isLoading = false;
+    });
+  }
+
+  void loadOrders() async {
+    var dataOrder = await OrderStorage.getOrders();
+    if (!mounted) return;
+    setState(() {
+      orders = dataOrder;
+    });
+  }
+
+  void bukaDialogLogout() {
+    var emailC = TextEditingController();
+    var passC = TextEditingController();
 
     showDialog(
       context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (dialogContext, setDialogState) {
-            return AlertDialog(
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+      builder: (dialogCtx) {
+        return AlertDialog(
+          title: Text(
+            'Konfirmasi Logout',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Masukkan email dan password akun Anda untuk verifikasi logout.',
+                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
               ),
-              title: const Text(
-                'Konfirmasi Logout',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                  color: ProfileColors.darkPine,
-                ),
+              SizedBox(height: 14),
+              CustomTextField(
+                controller: emailC,
+                hint: 'Email',
+                icon: Icons.email_outlined,
+                type: TextInputType.emailAddress,
               ),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Masukkan email dan password akun Anda untuk verifikasi logout.',
-                      style: TextStyle(
-                        color: ProfileColors.deepGreen,
-                        fontSize: 13,
-                        height: 1.4,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-
-                    CustomTextField(
-                      controller: emailController,
-                      hintText: 'Email',
-                      keyboardType: TextInputType.emailAddress,
-                      prefixIcon: const Icon(
-                        Icons.email_outlined,
-                        color: ProfileColors.deepGreen,
-                        size: 20,
-                      ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    CustomTextField(
-                      controller: passwordController,
-                      hintText: 'Password',
-                      obscureText: obscurePassword,
-                      prefixIcon: const Icon(
-                        Icons.lock_outline,
-                        color: ProfileColors.deepGreen,
-                        size: 20,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          obscurePassword
-                              ? Icons.visibility_off_outlined
-                              : Icons.visibility_outlined,
-                          color: ProfileColors.deepGreen,
-                          size: 20,
-                        ),
-                        onPressed: () {
-                          setDialogState(() {
-                            obscurePassword = !obscurePassword;
-                          });
-                        },
-                      ),
-                    ),
-
-                    if (errorMessage != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10),
-                        child: Text(
-                          errorMessage!,
-                          style: const TextStyle(
-                            color: Colors.redAccent,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
+              SizedBox(height: 10),
+              CustomTextField(
+                controller: passC,
+                hint: 'Password',
+                icon: Icons.lock_outline,
+                isPassword: true,
               ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogContext),
-                  child: const Text(
-                    'Batal',
-                    style: TextStyle(color: ProfileColors.deepGreen),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    final email = emailController.text.trim();
-                    final password = passwordController.text;
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogCtx),
+              child: Text(
+                'Batal',
+                style: TextStyle(color: AppColors.deepGreen),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () async {
+                var inputEmail = emailC.text.trim();
+                var inputPass = passC.text;
 
-                    if (email.isEmpty || password.isEmpty) {
-                      setDialogState(() {
-                        errorMessage = 'Email dan password tidak boleh kosong!';
-                      });
-                      return;
-                    }
-
-                    final isSuccess = await ProfileStorage.deleteProfile(
-                      email,
-                      password,
-                    );
-
-                    if (!mounted || !dialogContext.mounted) return;
-
-                    if (isSuccess) {
-                      Navigator.pop(dialogContext);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Berhasil keluar akun'),
-                          backgroundColor: ProfileColors.primaryGreen,
+                // cek email sama password dulu sebelum hapus data
+                if (inputEmail == '' || inputPass == '') {
+                  showDialog(
+                    context: dialogCtx,
+                    builder: (c) => AlertDialog(
+                      title: Text('Error'),
+                      content: Text('Email dan password tidak boleh kosong!'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(c),
+                          child: Text('OK'),
                         ),
-                      );
-
-                      setState(() {
-                        _isRegistered = false;
-                        _username = '';
-                        _email = '';
-                        _location = '';
-                      });
-                    } else {
-                      setDialogState(() {
-                        errorMessage = 'Email atau password salah!';
-                      });
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      ],
                     ),
-                  ),
-                  child: const Text('Keluar'),
-                ),
-              ],
-            );
-          },
+                  );
+                  return;
+                }
+
+                var sukses = await ProfileStorage.deleteProfile(
+                  inputEmail,
+                  inputPass,
+                );
+                if (!mounted) return;
+
+                if (sukses) {
+                  if (dialogCtx.mounted) {
+                    Navigator.pop(dialogCtx);
+                  }
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Berhasil keluar akun'),
+                      backgroundColor: AppColors.primaryGreen,
+                    ),
+                  );
+                  setState(() {
+                    sudahDaftar = false;
+                    username = '';
+                    email = '';
+                    location = '';
+                  });
+                } else {
+                  if (!dialogCtx.mounted) return;
+                  showDialog(
+                    context: dialogCtx,
+                    builder: (c) => AlertDialog(
+                      title: Text('Gagal'),
+                      content: Text('Email atau password salah!'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(c),
+                          child: Text('OK'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+              },
+              child: Text('Keluar'),
+            ),
+          ],
         );
       },
     );
   }
 
-  //tombol dalam bagian transaksi
-  Widget _buildTransactionButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  void bukaListPesanan(bool sudahTiba) async {
+    var listOrders = await OrderStorage.getOrders();
+    if (!mounted) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.paleMintWhite,
+      builder: (context) {
+        return SheetPesanan(orders: listOrders, sudahTiba: sudahTiba);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (isLoading) {
+      return Scaffold(
+        backgroundColor: AppColors.paleMintWhite,
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.primaryGreen),
+        ),
+      );
+    }
+
+    // kalau belum daftar lempar ke halaman register
+    if (!sudahDaftar) {
+      return RegisterPage(onRegisterSuccess: loadProfile);
+    }
+
+    int dikirimCount = 0;
+    int sudahTibaCount = 0;
+    for (var o in orders) {
+      for (var item in o.items) {
+        if (o.sudahTiba) {
+          sudahTibaCount += item.quantity;
+        } else {
+          dikirimCount += item.quantity;
+        }
+      }
+    }
+
+    return Scaffold(
+      backgroundColor: AppColors.paleMintWhite,
+      appBar: AppBar(
+        backgroundColor: AppColors.paleMintWhite,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          'Profil Saya',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppColors.darkPine,
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(20),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 32, color: ProfileColors.darkPine),
-            const SizedBox(height: 8),
+            CircleAvatar(
+              radius: 42,
+              backgroundColor: AppColors.softMint,
+              child: Icon(
+                Icons.person_rounded,
+                size: 48,
+                color: AppColors.deepGreen,
+              ),
+            ),
+            SizedBox(height: 14),
             Text(
-              label,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: ProfileColors.darkPine,
+              username,
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.darkPine,
+              ),
+            ),
+            SizedBox(height: 4),
+            Text(
+              email,
+              style: TextStyle(fontSize: 14, color: AppColors.deepGreen),
+            ),
+            SizedBox(height: 22),
+
+            // bagian transaksi
+            Card(
+              color: Colors.white,
+              elevation: 2,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Transaksi',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkPine,
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          size: 15,
+                          color: AppColors.darkPine,
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        InkWell(
+                          onTap: () => bukaListPesanan(false),
+                          child: Column(
+                            children: [
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Icon(
+                                    Icons.local_shipping_outlined,
+                                    size: 32,
+                                    color: AppColors.darkPine,
+                                  ),
+                                  if (dikirimCount > 0)
+                                    Positioned(
+                                      right: -6,
+                                      top: -6,
+                                      child: CircleAvatar(
+                                        radius: 9,
+                                        backgroundColor: Colors.redAccent,
+                                        child: Text(
+                                          '$dikirimCount',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                'Dikirim',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.darkPine,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () => bukaListPesanan(true),
+                          child: Column(
+                            children: [
+                              Stack(
+                                clipBehavior: Clip.none,
+                                children: [
+                                  Icon(
+                                    Icons.assignment_turned_in_outlined,
+                                    size: 32,
+                                    color: AppColors.darkPine,
+                                  ),
+                                  if (sudahTibaCount > 0)
+                                    Positioned(
+                                      right: -6,
+                                      top: -6,
+                                      child: CircleAvatar(
+                                        radius: 9,
+                                        backgroundColor: Colors.redAccent,
+                                        child: Text(
+                                          '$sudahTibaCount',
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              SizedBox(height: 6),
+                              Text(
+                                'Sudah tiba',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.darkPine,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            SizedBox(height: 14),
+
+            // alamat pengiriman
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.grey.shade300),
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: AppColors.softMint,
+                    child: Icon(
+                      Icons.location_on_outlined,
+                      color: AppColors.deepGreen,
+                    ),
+                  ),
+                  SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Alamat Pengiriman',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.darkPine,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          location != ''
+                              ? location
+                              : 'Belum ada alamat pengiriman',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: AppColors.deepGreen,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 26),
+
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: OutlinedButton.icon(
+                onPressed: bukaDialogLogout,
+                icon: Icon(Icons.logout, color: Colors.redAccent, size: 20),
+                label: Text(
+                  'Keluar dari Akun',
+                  style: TextStyle(
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  side: BorderSide(color: Colors.redAccent),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
               ),
             ),
           ],
@@ -231,270 +476,220 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
     );
   }
+}
+
+class SheetPesanan extends StatefulWidget {
+  final List<OrderData> orders;
+  final bool sudahTiba;
+
+  const SheetPesanan({
+    super.key,
+    required this.orders,
+    required this.sudahTiba,
+  });
+
+  @override
+  State<SheetPesanan> createState() => _SheetPesananState();
+}
+
+class _SheetPesananState extends State<SheetPesanan> {
+  Timer? timer;
+
+  @override
+  void initState() {
+    super.initState();
+    // refresh tiap detik supaya countdown jalan
+    timer = Timer.periodic(Duration(seconds: 1), (t) {
+      setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
+
+  String duaDigit(int n) => n < 10 ? '0$n' : '$n';
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        backgroundColor: ProfileColors.paleMintWhite,
-        body: Center(
-          child: CircularProgressIndicator(color: ProfileColors.primaryGreen),
-        ),
-      );
+    List<OrderData> list = [];
+    for (var o in widget.orders) {
+      if (o.sudahTiba == widget.sudahTiba) {
+        list.add(o);
+      }
     }
 
-    //redirect ke register page kalo belum ada akun
-    if (!_isRegistered) {
-      return RegisterPage(onRegisterSuccess: _checkRegistrationAndLoad);
-    }
-
-    return Scaffold(
-      backgroundColor: ProfileColors.paleMintWhite,
-      appBar: AppBar(
-        backgroundColor: ProfileColors.paleMintWhite,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'Profil Saya',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: ProfileColors.darkPine,
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 8),
-
-              Container(
-                width: 86,
-                height: 86,
-                decoration: BoxDecoration(
-                  color: ProfileColors.softMint,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: ProfileColors.deepGreen,
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
+    return SizedBox(
+      height: 480,
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.sudahTiba ? 'Pesanan Sudah Tiba' : 'Pesanan Dikirim',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.darkPine,
+                  ),
                 ),
-                child: const Icon(
-                  Icons.person_rounded,
-                  size: 50,
-                  color: ProfileColors.deepGreen,
+                IconButton(
+                  icon: Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
                 ),
-              ),
-
-              const SizedBox(height: 14),
-
-              Text(
-                _username,
-                style: const TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: ProfileColors.darkPine,
-                ),
-              ),
-
-              const SizedBox(height: 4),
-
-              Text(
-                _email,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: ProfileColors.deepGreen,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              //bagian baris transaksi
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          'Transaksi',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: ProfileColors.darkPine,
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_forward_ios_rounded,
-                          size: 16,
-                          color: ProfileColors.darkPine,
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildTransactionButton(
-                          icon: Icons.inventory_2_outlined,
-                          label: 'Diproses',
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Menu pesanan diproses'),
-                                duration: Duration(seconds: 1),
-                              ),
-                            );
-                          },
-                        ),
-                        _buildTransactionButton(
-                          icon: Icons.local_shipping_outlined,
-                          label: 'Dikirim',
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Menu pesanan dikirim'),
-                                duration: Duration(seconds: 1),
-                              ),
-                            );
-                          },
-                        ),
-                        _buildTransactionButton(
-                          icon: Icons.assignment_turned_in_outlined,
-                          label: 'Sudah tiba',
-                          onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Menu pesanan sudah tiba'),
-                                duration: Duration(seconds: 1),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              //baris alamat
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.06),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: ProfileColors.softMint,
-                        shape: BoxShape.circle,
+              ],
+            ),
+            SizedBox(height: 8),
+            Expanded(
+              child: list.isEmpty
+                  ? Center(
+                      child: Text(
+                        widget.sudahTiba
+                            ? 'Belum ada pesanan yang sudah tiba'
+                            : 'Belum ada pesanan yang sedang dikirim',
+                        style: TextStyle(color: AppColors.deepGreen),
                       ),
-                      child: const Icon(
-                        Icons.location_on_outlined,
-                        color: ProfileColors.deepGreen,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Alamat Pengiriman',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: ProfileColors.darkPine,
+                    )
+                  : ListView.builder(
+                      itemCount: list.length,
+                      itemBuilder: (context, i) {
+                        var order = list[i];
+                        var tgl =
+                            '${duaDigit(order.createdAt.day)}/${duaDigit(order.createdAt.month)}/${order.createdAt.year} ${duaDigit(order.createdAt.hour)}:${duaDigit(order.createdAt.minute)}';
+                        var statusText = '';
+                        if (widget.sudahTiba) {
+                          statusText =
+                              'Tiba ${duaDigit(order.arriveAt.hour)}:${duaDigit(order.arriveAt.minute)}:${duaDigit(order.arriveAt.second)}';
+                        } else {
+                          var sisa = order.sisaWaktu;
+                          statusText =
+                              'Sisa ${duaDigit(sisa.inMinutes)}:${duaDigit(sisa.inSeconds % 60)}';
+                        }
+
+                        return Card(
+                          color: Colors.white,
+                          margin: EdgeInsets.only(bottom: 10),
+                          child: Padding(
+                            padding: EdgeInsets.all(12),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      tgl,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.softMint,
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                      child: Text(
+                                        statusText,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColors.deepGreen,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 6),
+                                Text(
+                                  'Kurir: ${order.kurir}',
+                                  style: TextStyle(fontWeight: FontWeight.w600),
+                                ),
+                                Text(
+                                  'Alamat: ${order.alamat != '' ? order.alamat : '-'}',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey[700],
+                                  ),
+                                ),
+                                Divider(),
+                                for (var item in order.items)
+                                  Padding(
+                                    padding: EdgeInsets.only(bottom: 6),
+                                    child: Row(
+                                      children: [
+                                        item.thumbnail != ''
+                                            ? Image.network(
+                                                item.thumbnail,
+                                                width: 45,
+                                                height: 45,
+                                                fit: BoxFit.cover,
+                                                errorBuilder: (c, e, s) => Icon(
+                                                  Icons.shopping_bag_outlined,
+                                                ),
+                                              )
+                                            : Icon(
+                                                Icons.shopping_bag_outlined,
+                                                size: 32,
+                                              ),
+                                        SizedBox(width: 10),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                item.title,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              Text(
+                                                '${item.quantity}x Rp ${formatRp(item.price)}',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: Colors.grey[600],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                Divider(),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text('Total Pembayaran'),
+                                    Text(
+                                      'Rp ${formatRp(order.totalBayar)}',
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.deepGreen,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _location.isNotEmpty
-                                ? _location
-                                : 'Belum ada alamat pengiriman',
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: ProfileColors.deepGreen,
-                              height: 1.3,
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 28),
-
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: OutlinedButton.icon(
-                  onPressed: _showLogoutDialog,
-                  icon: const Icon(
-                    Icons.logout_rounded,
-                    color: Colors.redAccent,
-                    size: 20,
-                  ),
-                  label: const Text(
-                    'Keluar dari Akun',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.redAccent,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Colors.redAccent, width: 1.2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    backgroundColor: Colors.white,
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
