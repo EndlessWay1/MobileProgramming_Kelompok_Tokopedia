@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../widgets/bottom_navbar.dart';
 
+import 'package:aplikasi_tokped/features/notification/presentation/pages/notification_page.dart';
+
 class NavigationMenu extends StatefulWidget {
   const NavigationMenu({super.key});
 
@@ -42,7 +44,7 @@ class _NavigationMenuState extends State<NavigationMenu> {
       case 1:
         return const ReelsPage();
       case 2:
-        return const _TemporaryPage(title: 'Notification');
+        return const NotificationPage();
       case 3:
         return const ProfilePage();
       default:

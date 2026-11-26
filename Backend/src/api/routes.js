@@ -1,5 +1,6 @@
 import express from 'express';
 import itemsRoute from './components/items/items-route.js';
+import notificationRoute from './components/notifications/notifications-route.js';
 import { Readable } from 'node:stream';
 
 export default () => {
@@ -55,6 +56,6 @@ export default () => {
   });
 
   itemsRoute(app);
-
+  notificationRoute(app);
   return app;
 };

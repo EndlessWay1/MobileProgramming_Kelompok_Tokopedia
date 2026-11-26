@@ -194,7 +194,7 @@ class _ProfilePageState extends State<ProfilePage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: AppColors.paleMintWhite,
+      backgroundColor: AppColors.paleMint,
       builder: (context) {
         return SheetPesanan(orders: listOrders, sudahTiba: sudahTiba);
       },
@@ -205,7 +205,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     if (isLoading) {
       return Scaffold(
-        backgroundColor: AppColors.paleMintWhite,
+        backgroundColor: AppColors.paleMint,
         body: Center(
           child: CircularProgressIndicator(color: AppColors.primaryGreen),
         ),
@@ -230,9 +230,9 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.paleMintWhite,
+      backgroundColor: AppColors.paleMint,
       appBar: AppBar(
-        backgroundColor: AppColors.paleMintWhite,
+        backgroundColor: AppColors.paleMint,
         elevation: 0,
         centerTitle: true,
         title: Text(
