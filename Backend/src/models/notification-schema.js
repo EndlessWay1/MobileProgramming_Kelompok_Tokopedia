@@ -52,7 +52,10 @@ export default (db) => {
 
     NotificationSchema.index({ createdAt: -1});
     NotificationSchema.index({ isRead: 1, createdAt: -1});
+    NotificationSchema.index({ category: 1, createdAt: -1});
 
-    return db.models.Notifications || 
-        db.model('Notifications', NotificationSchema);
+    return(
+        db.models.Notifications || 
+        db.model('Notifications', NotificationSchema)
+    ); 
 };
