@@ -31,19 +31,19 @@ class ShoppingItem {
 
   factory ShoppingItem.fromJson(Map<String, dynamic> json) {
     return ShoppingItem(
-      sku: json['sku'] as String,
-      id: json['_id'] as String,
-      brand: json['brand'] as String,
-      category: json['category'] as String,
-      description: (json['description'] as String) ?? '',
-      discountPercentage: (json['discountPercentage'] as num).toInt(),
-      images: List<String>.from(json['images'] ?? []),
-      price: (json['price'] as num).toInt(),
-      stock: (json['stock'] as num).toInt(),
-      rating: (json['rating'] as num).toDouble(),
-      thumbnail: json['thumbnail'] as String,
-      title: json['title'] as String,
-      video: json['video'] as String,
-    );
+    sku: json['sku']?.toString() ?? '',
+    id: json['_id']?.toString() ?? '',
+    brand: json['brand']?.toString() ?? '',
+    category: json['category']?.toString() ?? '',
+    description: json['description']?.toString() ?? '',
+    discountPercentage: (json['discountPercentage'] as num?)?.toInt() ?? 0,
+    images: List<String>.from(json['images'] ?? []),
+    price: (json['price'] as num?)?.toInt() ?? 0,
+    stock: (json['stock'] as num?)?.toInt() ?? 0,
+    rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+    thumbnail: json['thumbnail']?.toString() ?? '',
+    title: json['title']?.toString() ?? '',
+    video: json['video']?.toString() ?? '',
+  );
   }
 }
